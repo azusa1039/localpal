@@ -269,6 +269,7 @@ const prepareCompletion = async ({
 // forward only the new substring.
 // Carried in ctx so a single run keeps a coherent audio stream.
 type TtsRunState = {
+  allowPlayback: boolean;
   // Snapshot of ttsStore.streamsReplies at run start; gates the per-chunk
   // TTS hook. Per-run so mid-stream toggles don't flicker audio.
   enabled: boolean;
@@ -575,6 +576,9 @@ async function applyEventToStore(
           '[useChatSession] agent run hit maxTurns; surfacing last available content',
         );
       }
+      if (!ctx.tts.allowPlayback) {
+        return;
+      }
       // Fire TTS auto-speak after the final text is observable. Store
       // enforces auto-speak / voice / idempotency gating internally.
       // A stopped run ends on whatever step it reached, often a tool-call
@@ -656,6 +660,7 @@ export const useChatSession = (
   } | null>,
   user: User,
   assistant: User,
+  enableVoice = true,
 ) => {
   const l10n = React.useContext(L10nContext);
   const conversationIdRef = useRef<string>(randId());
@@ -851,7 +856,8 @@ export const useChatSession = (
     const tools =
       (cleanCompletionParams.tools as ToolDefinition[] | undefined) ?? [];
     const tts: TtsRunState = {
-      enabled: ttsStore.streamsReplies,
+      allowPlayback: enableVoice,
+      enabled: enableVoice && ttsStore.streamsReplies,
       started: false,
       mayEcho: tools.length > 0,
       prevContent: '',

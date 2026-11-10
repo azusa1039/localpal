@@ -1154,6 +1154,37 @@ describe('useChatSession', () => {
       (ttsStore as any).autoSpeakEnabled = false;
     });
 
+    it('keeps text generation but suppresses saved auto-speak in the LocalPal flow', async () => {
+      modelStore.context!.completion = jest.fn(async (_params, onData) => {
+        onData?.({token: 'tok', content: 'Text reply.'} as any);
+        return {
+          timings: {total: 100},
+          usage: {},
+          text: 'Text reply.',
+          content: 'Text reply.',
+          reasoning_content: '',
+        } as any;
+      });
+      const {result} = renderHook(() =>
+        useChatSession(
+          {current: null},
+          textMessage.author,
+          mockAssistant,
+          false,
+        ),
+      );
+      await act(async () => {
+        await result.current.handleSendPress(textMessage);
+      });
+      expect(modelStore.context!.completion).toHaveBeenCalled();
+      expect(chatSessionStore.updateMessage).toHaveBeenCalled();
+      expect(ttsStore.onAssistantMessageStart).not.toHaveBeenCalled();
+      expect(ttsStore.onAssistantMessageChunk).not.toHaveBeenCalled();
+      expect(ttsStore.onAssistantMessageComplete).not.toHaveBeenCalled();
+      expect(ttsStore.autoSpeakEnabled).toBe(true);
+      expect(ttsStore.userTTSOverride).toBe(true);
+    });
+
     it('fires onAssistantMessageStart on first token and onAssistantMessageChunk per delta', async () => {
       const finalText = 'Hello world.';
 

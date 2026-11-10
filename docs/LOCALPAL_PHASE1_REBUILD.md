@@ -246,3 +246,13 @@ initial baseline run terminated by memory pressure.
 - Focused app, chat, input, footer and existing speech compatibility checks passed:
   **13 suites / 205 tests**, exit 0 (52.69 seconds).
 - Global ESLint passed with 0 errors and the same 46 original warnings (79.79 seconds).
+
+### Saved speech preferences
+
+A final source audit found that a saved `userTTSOverride=true` plus auto-speak
+could still play a reply even with speech controls hidden. `useChatSession` now
+accepts the same opt-out flag and gates both streaming speech and completion
+playback in the LocalPal flow. It preserves the saved preference, and defaults
+to the original behavior for other callers. Two hook suites / 70 tests passed,
+including normal text completion with saved auto-speak enabled and no speech
+callbacks. TypeScript passed (18.95 seconds).

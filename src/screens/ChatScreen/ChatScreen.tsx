@@ -90,6 +90,7 @@ export const ChatScreen: React.FC<ChatScreenProps> = observer(props => {
     currentMessageInfo,
     user,
     assistant,
+    enableVoice,
   );
 
   const voiceMode = useVoiceMode({
