@@ -21,8 +21,8 @@
 | 0 | Baseline, environment, feature branch, remote backup | Branch backed up; clean regression running |
 | 1 | Chat shell, drawer, composer, model dropdown, overflow | Implemented; native visual acceptance pending |
 | 2 | Settings and local model management integration | Implemented; device inference pending |
-| 3 | Existing streaming, history, personas, generation and import/export | Pending |
-| 4 | Markdown and standalone italic paragraphs | Pending |
+| 3 | Existing streaming, history, personas, generation and import/export | Integration tests passed; device persistence pending |
+| 4 | Markdown and standalone italic paragraphs | Implemented; parser and light/dark rendering tests passed |
 | 5 | Regression, JS bundle, APK and device acceptance | Pending |
 
 ## Validation record
@@ -78,3 +78,30 @@ Android runtime; these will only be marked verified when executed.
   CMake 3.22.1 installed outside the repository. Initial Gradle build identified
   a missing Java 17 toolchain; Java 17 setup is in progress. No dependency or
   Android inference source changes were made to work around the environment.
+
+### Batch 3 — chat and personalization integration
+
+- New file: `src/components/__tests__/PersonaSettingsSheet.test.tsx`.
+- The persona selector uses `ChatSessionStore.setActivePal`; existing dialogs
+  use `PalSheet`, `PalStore.createPal`/`updatePal` and the existing repositories.
+  No additional persona store or cross-session memory layer was introduced.
+- Focused validation: 6 suites / 141 tests passed, covering selection/clearing,
+  original editor data, persistence failures, real system-prompt construction,
+  stopping generation, persona parameter resolution, generation settings and
+  export/import roundtrips.
+- Existing `useChatSession` streaming and repository data formats are unchanged.
+  Process-restart persistence and actual model generation remain device checks.
+
+### Batch 4 — Markdown
+
+- Files: `MarkdownView/{renderMarkdown.ts,MarkdownView.tsx,MarkdownProvider.tsx}`
+  and `MarkdownView/__tests__/{renderMarkdown.test.ts,MarkdownView.test.tsx}`.
+- A dedicated Marked instance annotates only complete top-level paragraphs
+  containing one emphasis token. Original Markdown is not changed. Rendering
+  retains the paragraph and emphasis structure and preserves reference links.
+- `standalone-italic` is styled by the existing HTML render provider with
+  `#6B7280` in light mode and `#9CA3AF` in dark mode, retaining italics.
+- Inline emphasis, headings, lists, quotes, fenced code, ordinary text and
+  incomplete streaming emphasis do not receive the secondary color.
+- Validation: 2 suites / 37 tests passed, including actual rendered light/dark
+  text styles, table/code rendering, reference links and streaming transitions.

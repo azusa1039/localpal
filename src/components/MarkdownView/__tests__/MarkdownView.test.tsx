@@ -11,6 +11,26 @@ import {useTheme} from '../../../hooks';
 import {MarkdownView} from '../MarkdownView';
 
 describe('MarkdownView Component', () => {
+  it.each([
+    [false, '#6B7280'],
+    [true, '#9CA3AF'],
+  ])('uses the requested italic paragraph color (dark=%s)', (dark, color) => {
+    const theme = dark ? themeFixtures.darkTheme : themeFixtures.lightTheme;
+    jest.mocked(useTheme).mockReturnValueOnce(theme);
+    const {getByText} = render(
+      <MarkdownView
+        markdownText={'*Quiet paragraph*\n\nNormal *inline* text.'}
+        maxMessageWidth={300}
+      />,
+      {theme},
+    );
+    expect(getByText('Quiet paragraph')).toHaveStyle({
+      color,
+      fontStyle: 'italic',
+    });
+    expect(getByText('Normal inline text.')).not.toHaveStyle({color});
+  });
+
   it('renders markdown content correctly', () => {
     const markdownText = 'Hello **World**';
     const {getByText} = render(

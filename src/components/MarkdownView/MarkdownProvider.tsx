@@ -53,10 +53,20 @@ export const MarkdownProvider: React.FC<React.PropsWithChildren> = ({
 }) => {
   const theme = useTheme();
   const tagsStyles = useMemo(() => createTagsStyles(theme), [theme]);
+  const classesStyles = useMemo(
+    () => ({
+      'standalone-italic': {
+        color: theme.dark ? '#9CA3AF' : '#6B7280',
+        fontStyle: 'italic' as const,
+      },
+    }),
+    [theme.dark],
+  );
 
   return (
     <TRenderEngineProvider
       tagsStyles={tagsStyles}
+      classesStyles={classesStyles}
       customHTMLElementModels={tableHTMLElementModels}
       systemFonts={SYSTEM_FONTS}>
       <RenderHTMLConfigProvider

@@ -1,10 +1,8 @@
 import {View} from 'react-native';
 import React, {useMemo} from 'react';
 
-import {marked} from 'marked';
 import {RenderHTMLSource} from 'react-native-render-html';
-
-marked.use({});
+import {renderMarkdown} from './renderMarkdown';
 
 interface MarkdownViewProps {
   markdownText: string;
@@ -29,7 +27,7 @@ const isEmptyContent = (content: string): boolean => {
 export const MarkdownView: React.FC<MarkdownViewProps> = React.memo(
   ({markdownText, maxMessageWidth}) => {
     const htmlContent = useMemo(
-      () => marked(markdownText) as string,
+      () => renderMarkdown(markdownText),
       [markdownText],
     );
     const source = useMemo(() => ({html: htmlContent}), [htmlContent]);
