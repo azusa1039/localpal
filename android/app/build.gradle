@@ -3,10 +3,11 @@ apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "org.jetbrains.kotlin.kapt"
 apply plugin: "com.facebook.react"
 
-// Add the Google Services plugin dependency
-// This is used exclusively for sending benchmarks (with user consent) to Hugging Face Spaces via Firebase.
-// Firebase is used for App Check functionality, allowing unauthenticated users to submit their benchmark data securely.
-apply plugin: "com.google.gms.google-services"
+// Firebase is only used by optional upstream benchmark submission. A local
+// LocalPal build must not require cloud credentials or a fabricated config.
+if (!fileTree(dir: projectDir, includes: ["google-services.json", "src/**/google-services.json"]).isEmpty()) {
+    apply plugin: "com.google.gms.google-services"
+}
 
 apply from: "../../node_modules/react-native-config/android/dotenv.gradle"
 

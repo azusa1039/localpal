@@ -112,9 +112,9 @@ it('mounts the app once UIStore hydration completes', () => {
     __setHydrated(true);
   });
 
-  // Splash gone, post-hydration tree mounted (drawer titles present).
+  // Splash gone, LocalPal chat and its local navigation are mounted.
   expect(result.queryByTestId('hydration-splash')).toBeNull();
-  expect(result.queryByText('Models')).not.toBeNull();
+  expect(result.queryByTestId('drawer-item-new-chat')).not.toBeNull();
 });
 
 describe('status bar', () => {

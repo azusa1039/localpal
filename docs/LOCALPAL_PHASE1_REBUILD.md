@@ -105,3 +105,36 @@ Android runtime; these will only be marked verified when executed.
   incomplete streaming emphasis do not receive the secondary color.
 - Validation: 2 suites / 37 tests passed, including actual rendered light/dark
   text styles, table/code rendering, reference links and streaming transitions.
+
+## Regression and build follow-up
+
+- `yarn typecheck` passed; `yarn lint` passed with the original 46 warnings.
+- First complete implementation regression: 442 suites passed, 1 suite failed;
+  9,368 tests passed, 2 skipped, 1 stale assertion failed. All 310 snapshots passed.
+  The failed hydration assertion expected a drawer Models destination removed by
+  the requested navigation design. It now checks the new-chat entry instead.
+- App + previously transient upstream HubRunSheetHost checks: 2 suites / 14 tests
+  passed. A final complete regression is running with the corrected assertion.
+- Clean baseline worktree run was terminated with exit 137 after 401 suite results
+  under the environment's 8 GiB memory limit. It is not recorded as a passing
+  baseline. One HubRunSheetHost timing failure in that run passed on focused retry.
+- Java 17 is installed alongside Java 21 outside the repository. The native build
+  also requires the speech dependency's NDK 28.2.13676358, which Gradle is fetching.
+- Local Android builds now apply Google Services only when a real configuration
+  file exists. Local chat does not require Firebase credentials. Existing cloud
+  benchmark builds with configuration retain their original plugin behavior.
+- The initial separate Metro bundle was interrupted after memory pressure; a
+  fresh bundle/build will be verified before claiming success.
+- Full changed-file and verified remote-backup SHAs: `LOCALPAL_PHASE1_FILES.md`.
+
+### Final automated regression
+
+- `yarn test --runInBand`: **444 suites passed; 9,374 tests passed; 2 skipped;
+  310 snapshots passed**, exit 0, 243.08 seconds. The repository's global
+  coverage thresholds remain enabled. Run with a 3 GiB Node heap limit to
+  fit alongside the native build in this 8 GiB environment.
+- `yarn typecheck`: passed (50.21 seconds).
+- `yarn lint`: passed, 0 errors and 46 existing warnings (60.86 seconds).
+- Additional changed-test lint: passed.
+- Source implementation and all automated regression checks are complete;
+  native build, emulator screenshots and physical-device acceptance remain open.
