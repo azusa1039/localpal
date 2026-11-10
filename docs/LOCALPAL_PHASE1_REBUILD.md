@@ -1,268 +1,131 @@
-# LocalPal Phase 1 rebuild
+# LocalPal Phase 1 开发与验收报告
 
-## Scope and baseline
+## 当前结论
 
-- Request: GPT Android style navigation and chat, local model management,
-  existing local streaming/history/personas, and standalone italic paragraphs.
-- Reference: user's annotated screenshot and Phase 1 plan supplied 2026-11-10.
-- Base: `77847397085de7af31d23c32e26d7c9aaaecea1e` (remote `main`).
-- Branch: `feat/localpal-phase1-rebuild`; main is unchanged.
-- Stack: React Native 0.87.1, React 19.2.3, TypeScript 5.9.3, llama.rn
-  0.13.0-rc.9. Dependencies and native inference architecture are retained.
-- Reuse: `ModelStore.selectModel`, `useChatSession`, WatermelonDB
-  `ChatSessionRepository`, `PalStore`/`setActivePal`, existing generation and
-  model settings sheets, GGUF import/download, vision projection settings.
-- No database schema, model format, or inference parameter changes are planned.
+源码改造已实现并持续推送到 `feat/localpal-phase1-rebuild`。当前仍是待运行验收的候选版本，**不能据此认定 Phase 1 全部完成**。
 
-## Batch tracking
+| 项目 | 当前状态 |
+| --- | --- |
+| 原始基线 | 完整测试通过 |
+| 聊天、侧栏、模型下拉、三点菜单 | 已实现，待 APK 界面检查 |
+| 设置、模型管理与角色编辑整合 | 已实现，待设备操作检查 |
+| Markdown 与独立斜体颜色 | 解析与深浅色渲染测试通过，待原生截图 |
+| TypeScript / ESLint | 类型检查通过；lint 0 错误，46 项原有警告 |
+| 最终完整 Jest | 445 组 / 9,379 项通过，2 项跳过，310 个快照通过 |
+| Android APK | 构建、签名、完整原生负载验证通过；模拟器安装返回 Success |
+| 模拟器安装、截图、重启后历史 | 安装成功且已发送启动命令；完整界面和重启持久化验收未完成 |
+| 实际模型加载、流式生成与停止 | 按用户选择留到真机验收；尚未实测 |
+| Android 真机安装与截图 | 待执行；当前没有连接的实体设备 |
 
-| Batch | Scope | Status |
-| --- | --- | --- |
-| 0 | Baseline, environment, feature branch, remote backup | Complete: clean baseline regression passed |
-| 1 | Chat shell, drawer, composer, model dropdown, overflow | Implemented; native visual acceptance pending |
-| 2 | Settings and local model management integration | Implemented; device inference pending |
-| 3 | Existing streaming, history, personas, generation and import/export | Integration tests passed; device persistence pending |
-| 4 | Markdown and standalone italic paragraphs | Implemented; parser and light/dark rendering tests passed |
-| 5 | Regression, JS bundle, APK and device acceptance | Pending |
+## 范围与实现
 
-## Validation record
+- 参考用户 2026-11-10 提供的标注截图和原始计划，完整请求保存在 `LOCALPAL_PHASE1_REQUEST.md`。
+- 原始基线 / remote main：`77847397085de7af31d23c32e26d7c9aaaecea1e`。
+- React Native 0.87.1、React 19.2.3、TypeScript 5.9.3、llama.rn 0.13.0-rc.9 保持原有版本。
+- 未修改数据库 schema、模型格式、原生推理源代码或推理参数语义。
+- UI 规范和边界见 `LOCALPAL_UI_ARCHITECTURE.md`；运行验收步骤见 `LOCALPAL_ANDROID_ACCEPTANCE.md`。
 
-Baseline TypeScript passed. Baseline ESLint passed with 46 existing warnings.
-The first full Jest run overlapped source edits and is not treated as a pristine
-baseline (436 suites passed; 5 failed from changed UI contracts, a new locale
-section and unavailable Ruby). A clean detached worktree at the base SHA is
-running the original tests separately, with a temporary local Ruby runtime.
+### Batch 0：基线与备份
 
-### Batch 1 — chat shell
+创建独立分支，main 保持不变。每次推送后用 `git ls-remote` 核对远程 SHA；未使用 force push、reset 或 clean。逐提交文件清单见 `LOCALPAL_PHASE1_FILES.md`。
 
-- Files: `ChatHeader/styles.ts`, `ChatHeaderTitle/*`, `HeaderRight/*`,
-  `SidebarContent/*`, `ChatInput/styles.ts`, `ChatView/styles.ts`,
-  `ChatEmptyPlaceholder/ChatEmptyPlaceholder.tsx`, `PersonaSettingsSheet.tsx`,
-  Android `strings.xml`, English labels and corresponding locale tests.
-- Chat header model dropdown lists installed local models and calls
-  `ModelStore.selectModel`. Loading status and an always-available model
-  management action are shown; switching is disabled during generation/loading.
-- Drawer: LocalPal, new chat, grouped local history, fixed settings footer.
-  Rename/delete/pin/bulk export remain on the existing history implementation.
-- Overflow: generation settings, personalization, existing conversation
-  operations, import/export. Duplicate model submenu removed.
-- Composer uses a floating rounded field; decorative empty-state logo removed.
-- Focused chat/drawer/locale checks: 6 suites, 144 tests passed using
-  `jest --runInBand --coverage=false`. Focused runs disable the global coverage
-  threshold; full regression retains the repository coverage requirements.
-- TypeScript passed; ESLint passed with the same 46 pre-existing warnings.
-- Native screenshot acceptance is pending the Android runtime setup.
+在原始 SHA 的独立只读基线 worktree 完成完整回归：**441 组 / 9,350 项测试通过，2 项跳过，310 个快照通过**，exit 0，677.60 秒。使用 Node 22 与临时 Ruby 运行时。
 
-The image is a layout reference, not proof of a running LocalPal build. Device
-screenshots, APK installation and local model inference require an actual
-Android runtime; these will only be marked verified when executed.
+此前一次基线测试与源码编辑重叠，不作为原始基线证据；另一次因 8 GiB 环境内存压力以 exit 137 结束，也未记录为通过。上述成功的独立基线运行替代这两次无效结果。
 
-### Batch 2 — settings and model management
+### Batch 1：GPT 风格聊天导航
 
-- Files: `App.tsx`, `HeaderLeft/HeaderLeft.tsx`, `navigationConstants.ts`,
-  `SettingsScreen/{SettingsHomeScreen.tsx,SettingsScreen.tsx,index.ts}`,
-  `ModelsScreen/{ModelsScreen.tsx,ModelCard/styles.ts,FABGroup/FABGroup.tsx}`,
-  and focused settings/FAB tests.
-- New settings home has local models, personalization, appearance/language,
-  and advanced settings. Subpages have explicit back buttons.
-- LocalPal starts directly in chat after data hydration/migration; the upstream
-  cloud/voice onboarding is not part of the new entry flow.
-- In this flow, advanced settings hide voice, purchases, accounts, cloud search
-  and the API server; model management hides remote-model/server actions.
-  Existing components retain their upstream defaults for other callers/tests.
-- Existing GGUF import, download progress, loading/unloading, deletion, generation
-  parameters, multimodal vision toggles and projection selection are retained.
-- Validation: 7 suites / 178 tests passed (`--coverage=false`), including
-  model cards, models screen, model settings, projection selector and settings.
-- Native build setup: SDK 37.0, build-tools 37.0.0, NDK 27.3.13750724 and
-  CMake 3.22.1 installed outside the repository. Initial Gradle build identified
-  a missing Java 17 toolchain; Java 17 setup is in progress. No dependency or
-  Android inference source changes were made to work around the environment.
+- 顶部侧栏入口、当前标题、模型名称/加载状态、新建聊天与三点菜单。
+- 模型下拉列出已安装本地模型，实际调用并等待 `ModelStore.selectModel`；加载和生成期间禁止切换，异常有提示。无模型时仍可进入模型管理。
+- LocalPal 侧栏保留新聊天、按日期分组的本地历史、原有标题/固定/删除/多选/导出管理和底部设置。
+- 三点菜单整合原有生成参数、个性化、重命名、复制、删除、导入与导出，移除重复模型子菜单。
+- 浮动圆角输入区保留文字发送/停止/附件；透明外层与有背景的圆角内层避免方形底色，保留角色背景色。
+- 移除装饰性空白页 Logo 和不需要的通用问候，不加入项目、插件、资料库、定时任务等空壳入口。
+- Android 显示名为 LocalPal；内部包名仍为 `com.pocketpalai`，避免破坏原有安装与数据身份。
+- 初期针对性验证：6 组 / 144 项测试通过。
 
-### Batch 3 — chat and personalization integration
+### Batch 2：设置与本地模型管理
 
-- New file: `src/components/__tests__/PersonaSettingsSheet.test.tsx`.
-- The persona selector uses `ChatSessionStore.setActivePal`; existing dialogs
-  use `PalSheet`, `PalStore.createPal`/`updatePal` and the existing repositories.
-  No additional persona store or cross-session memory layer was introduced.
-- Focused validation: 6 suites / 141 tests passed, covering selection/clearing,
-  original editor data, persistence failures, real system-prompt construction,
-  stopping generation, persona parameter resolution, generation settings and
-  export/import roundtrips.
-- Existing `useChatSession` streaming and repository data formats are unchanged.
-  Process-restart persistence and actual model generation remain device checks.
+设置首页整合本地模型、个性化、深浅色、语言与更多设置。模型和高级设置页有明确返回路径；Android 返回键使用 drawer history。
 
-### Batch 4 — Markdown
+LocalPal 的入口通过 `localOnly` 复用原页面，隐藏 Plus、语音、账户、云搜索、API 服务及远程模型入口。保留 GGUF 下载/导入、进度与大小、加载/卸载/删除、模型参数、视觉投影模型配置及原有文件管理逻辑。
 
-- Files: `MarkdownView/{renderMarkdown.ts,MarkdownView.tsx,MarkdownProvider.tsx}`
-  and `MarkdownView/__tests__/{renderMarkdown.test.ts,MarkdownView.test.tsx}`.
-- A dedicated Marked instance annotates only complete top-level paragraphs
-  containing one emphasis token. Original Markdown is not changed. Rendering
-  retains the paragraph and emphasis structure and preserves reference links.
-- `standalone-italic` is styled by the existing HTML render provider with
-  `#6B7280` in light mode and `#9CA3AF` in dark mode, retaining italics.
-- Inline emphasis, headings, lists, quotes, fenced code, ordinary text and
-  incomplete streaming emphasis do not receive the secondary color.
-- Validation: 2 suites / 37 tests passed, including actual rendered light/dark
-  text styles, table/code rendering, reference links and streaming transitions.
+模型卡片统一边框、边距与 Radius/L。主题变量的架构检查只允许这一个明确改版文件，未放宽为全局规则。
 
-## Regression and build follow-up
+针对性验证：7 组 / 178 项测试通过，包含模型卡片、参数、投影模型、设置与 FAB。
 
-- `yarn typecheck` passed; `yarn lint` passed with the original 46 warnings.
-- First complete implementation regression: 442 suites passed, 1 suite failed;
-  9,368 tests passed, 2 skipped, 1 stale assertion failed. All 310 snapshots passed.
-  The failed hydration assertion expected a drawer Models destination removed by
-  the requested navigation design. It now checks the new-chat entry instead.
-- App + previously transient upstream HubRunSheetHost checks: 2 suites / 14 tests
-  passed. A final complete regression is running with the corrected assertion.
-- Clean baseline worktree run was terminated with exit 137 after 401 suite results
-  under the environment's 8 GiB memory limit. It is not recorded as a passing
-  baseline. One HubRunSheetHost timing failure in that run passed on focused retry.
-- Java 17 is installed alongside Java 21 outside the repository. The native build
-  also requires the speech dependency's NDK 28.2.13676358, which Gradle is fetching.
-- Local Android builds now apply Google Services only when a real configuration
-  file exists. Local chat does not require Firebase credentials. Existing cloud
-  benchmark builds with configuration retain their original plugin behavior.
-- The initial separate Metro bundle was interrupted after memory pressure; a
-  fresh bundle/build will be verified before claiming success.
-- Full changed-file and verified remote-backup SHAs: `LOCALPAL_PHASE1_FILES.md`.
+### Batch 3：聊天、历史与角色
 
-### Final automated regression
+- 继续使用 `useChatSession`、WatermelonDB / `ChatSessionRepository` 和现有导入导出数据结构。
+- 个性化选择器调用 `ChatSessionStore.setActivePal`；创建/编辑复用 `PalSheet`、`PalStore` 与原有系统提示词构造。
+- 没有增加平行角色存储或跨会话长期记忆。
+- 角色、生成参数、停止和导入导出针对性验证：6 组 / 141 项测试通过。
+- LocalPal 主流程传递 `enableVoice=false`，隐藏录音、语音模式与朗读，取消语音和购买的启动初始化。
+- 对已保存自动朗读偏好同时关闭流式语音与回复结束播放；保留偏好原值和共享组件的原有默认行为。
+- 语音范围修正验证：13 组 / 205 项测试通过；保存偏好回归验证：2 组 / 70 项通过，包含文字回复正常完成且不触发语音回调。
 
-- `yarn test --runInBand`: **444 suites passed; 9,374 tests passed; 2 skipped;
-  310 snapshots passed**, exit 0, 243.08 seconds. The repository's global
-  coverage thresholds remain enabled. Run with a 3 GiB Node heap limit to
-  fit alongside the native build in this 8 GiB environment.
-- `yarn typecheck`: passed (50.21 seconds).
-- `yarn lint`: passed, 0 errors and 46 existing warnings (60.86 seconds).
-- Additional changed-test lint: passed.
-- Source implementation and all automated regression checks are complete;
-  native build, emulator screenshots and physical-device acceptance remain open.
+### Batch 4：Markdown
 
-### Android bundle verification
+独立 Marked 实例只为“完整顶层段落且内容为一个 emphasis token”的节点标记 `standalone-italic`。不改写原始 Markdown，不进行语义判断或角色扮演分类。
 
-- Production-mode Android JS bundle passed using the repository's `.nvmrc`
-  Node 22.21.0, a 5 GiB Node heap, one Metro worker and `--minify false`
-  (the same minification mode used by the existing Hermes release task).
-- Bundle: `/workspace/localpal-artifacts/index.android.bundle`; 48 assets copied.
-- SHA256: `b58501ba73bb1410ca23199492ab3204085c39286334c9efeed11942d32e07ac`.
-- The earlier Node 24 attempts with 2/3 GiB heaps failed with V8 heap exhaustion.
-  No application dependencies were upgraded to resolve this.
-- APK build now uses Node 22, one Gradle/Metro worker and temporary CMake job
-  pools to fit the environment. Resource limits are outside source; native
-  inference settings and model data are unchanged.
-- Emulator tools and an Android 11 x86_64 AVD are installed. The emulator connected
-  to ADB, but was stopped before app installation to release build memory.
-  This is not counted as application runtime verification.
+- 浅色 #6B7280；深色 #9CA3AF；保持斜体。
+- 普通正文、行内斜体、标题、列表、引用和代码不获得该灰色样式。
+- 保留链接、表格、代码、原结构及 reference links。
+- 2 组 / 38 项测试通过，覆盖真实渲染后的深浅色样式、不完整流式段落到完整段落的转换、代码/表格和 500 对长段落。
 
-### Composer visual follow-up
+## 自动化测试记录
 
-- Moved the background from the outer composer wrapper to the rounded input
-  itself, keeping persona background colors and the floating outline visible.
-  Model cards now use the existing `theme.radius.l` token.
-- Focused input/chat/model-card regression: 3 suites / 121 tests passed.
-  Changed-file ESLint passed with no new warnings. Final TypeScript check passed
-  using Node 22.21.0 (13.26 seconds).
-- The production-mode JS bundle was regenerated successfully after this polish.
-- Android runtime acceptance steps: `LOCALPAL_ANDROID_ACCEPTANCE.md`.
-  Original user plan: `LOCALPAL_PHASE1_REQUEST.md`.
+- 早期完整实现回归：**444 组 / 9,374 项通过，2 项跳过，310 个快照通过**，exit 0，243.08 秒。
+- 后续输入区/模型卡片：3 组 / 121 项通过；导航：2 组 / 24 项通过。
+- 最近类型检查：通过，18.95 秒。
+- 最终全局 lint：0 错误，46 项原有警告，45.84 秒；改动文件 lint 也通过。
+- 最终源码完整测试第一次：444 组 / 9,378 项通过，1 项设计变量清单检查失败，2 项跳过，全部 310 个快照通过，248.575 秒。
+- 失败定位到模型卡片有意使用的 `theme.radius.l`。该检查明确允许记录架构说明后添加精确文件；已添加该文件与说明，4 项规范测试通过。修正后的完整重跑已通过（见下）。
+- 针对性测试使用 `--coverage=false`；完整回归保留仓库的全局覆盖率要求。
 
-### Android navigation follow-up
+Batch 3 的角色验证和 Batch 4 的 Markdown 合并在一次备份提交中，未拆分或改写已推送历史；这与原计划“每 Batch 单独提交”的差异在此明确记录。
 
-- Drawer navigation now uses history for Android back behavior, so returning
-  from model management/advanced settings follows the visited settings route.
-- App/sidebar checks: 2 suites / 24 tests passed; changed-file ESLint passed.
-- Android native compilation has started for arm64-v8a and x86_64. APK installation,
-  screenshots and local model inference are still pending.
+## Android 构建环境与原生负载
 
-### Final source checks after navigation changes
+构建工具安装在仓库外：Node 22.21.0（`.nvmrc`）、Java 17、Android SDK / Build Tools 37、NDK 27.3.13750724、CMake 3.22.1；语音依赖自动安装 NDK 28.2.13676358。未升级应用依赖。
 
-- Node 22 `yarn typecheck`: passed (16.61 seconds).
-- Node 22 `yarn lint`: passed, 0 errors / 46 existing warnings (43.23 seconds).
-- Added a long Markdown reply regression with 500 ordinary/italic paragraph pairs
-  and a fenced code block; the final Markdown suites passed: 2 suites / 38 tests.
+- 仅在存在真实 `google-services.json` 时应用 Google Services 插件；没有伪造 Firebase 配置。带真实配置的原有构建保持原行为。
+- 遵照上游 CI，从源码构建已修补的 llama.rn，保持原始 native payload manifest 和验证器。
+- Hexagon SDK 6.4.0.2 / Tools 19.0.04 与上游 CI 一致。
+- SDK 压缩包 SHA256：`b4a57a774795cf12da19a777a5d306e970905bf9758a4c4765e5e4593428ae0b`。
+- 被实际使用文件的校验 SHA256：`f56685ec2513933ab6465c44e40e8ce0263bc40751961aa2468da9cbcdfe7409`。
+- 使用 `ORG_GRADLE_PROJECT_rnllamaBuildFromSource=true` 和 `verify-android-payload.js --print-variants` 给出的完整 variant 清单，配置 `HEXAGON_SDK_ROOT`、`HEXAGON_TOOLS_ROOT`。
+- 早期缺 SDK 的 CPU 构建被停止，未作为最终 APK。最终配置确认启用 Hexagon DSP。
+- 可选构建资源脚本：`scripts/localpal-android-build.init.gradle`。一个 Gradle worker、一个 Metro worker、llama.rn 两个 C++ 编译任务/其他模块一个；不改变运行时推理参数。
+- 构建命令（在 android 目录）：`./gradlew assembleProdRelease --no-daemon --max-workers=1 --init-script ../scripts/localpal-android-build.init.gradle`。
+- 最终 APK 必须通过原有 `scripts/verify-android-payload.js`，核验两种 ABI、优化库、Hexagon/OpenCL 导出、DSP 资源和原生补丁标记，不能用预编译替代绕过。
+- 无私人发布密钥时沿用仓库的测试签名配置；交付应标记为测试 APK。
 
-### Reproducing the constrained Android build
+## APK 与 Bundle 产物
 
-An optional portable init script records the resource controls proven during
-this build: `scripts/localpal-android-build.init.gradle`. With Node 22.21.0
-on PATH, Java 17 and Android SDK installed, run from `android/`:
+- `assembleProdRelease`：exit 0，BUILD SUCCESSFUL（1h 14m 12s；包含资源调度暂停时间）。
+- APK：`LocalPal-phase1-test.apk`，约 264 MiB；包名 `com.pocketpalai`，版本 1.22.1 / code 159，min SDK 24 / target SDK 36，arm64-v8a 与 x86_64。
+- APK SHA256：`9bcff5111bbcb77fde45d8915fd1865ea466421849c3cef19f313c4bc0bc6c7f`。
+- APK v2 签名验证通过，测试签名；不是私人发布密钥签名。
+- `verify-android-payload.js`：exit 0，所有要求的库、DSP 资源、后端导出与原生补丁标记通过。
+- 最终 Android JS Bundle 已重新生成，包含最新源码和 48 项资源；另附同 APK 的 Hermes Bundle。
+- JS Bundle SHA256：`d1a7c564f00f6ba3dd8e65be1f7c5eea693b0e86982c0e35da8c907118dd2300`。
+- 发布 sourcemap 确认包含最新 App speech opt-out 与 `useChatSession` playback gate，不是早期缓存版本。
+- GitHub 开发分支持续备份源码。APK / JS Bundle / 原生验证报告保存在交付附件目录；当前 CLI 没有可用于 Release 附件上传的凭据，没有发布公开 Release。
 
-```sh
-./gradlew assembleProdRelease --no-daemon --max-workers=1 \
-  --init-script ../scripts/localpal-android-build.init.gradle
-```
+## 尚未执行的验收与环境限制
 
-This changes build-time worker/heap limits only, and retains existing runtime
-model/inference settings. Release builds without a private signing key keep the
-upstream debug-signing fallback and should be treated as test APKs.
+- AOSP Android 30 x86_64 模拟器使用软件模拟（没有 KVM）。APK 安装日志返回 Success，启动命令已发送。系统启动期间出现 System UI 无响应提示；完整应用界面、截图对照和重启持久化验收未完成，不能记为通过。
+- `huggingface.co` 的真实 GGUF 下载被代理拒绝：`CONNECT tunnel failed, response 403`。未通过其他主机绕过策略，也未用模拟模型冒充真实推理。
+- 用户已选择“先交付 APK，模型在真机上验收”。因此不再等待网络变更；模型实测明确移交真机验收，未记录为已通过。
+- Markdown / 历史导入样例明确注明“导入样例，非本地模型生成”，只用于界面、导入和持久化检查。
+- 真机安装、离线模型生成、停止、模型下载/导入/加载/卸载/删除、视觉投影及重启持久化未实际执行的部分均保持待验证，不能用 Jest 或截图替代。
 
-### Full native payload requirements
+## 最终交付与备份记录
 
-- The upstream CI requires a source-built patched llama.rn and the Hexagon/OpenCL
-  backend. A CPU-only candidate is not accepted as the final native package.
-- Installed the exact CI Hexagon SDK 6.4.0.2 / tools 19.0.04 outside the repository.
-  The tarball SHA256 matched `b4a57a774795cf12da19a777a5d306e970905bf9758a4c4765e5e4593428ae0b`.
-  The consumed-file SHA256 matched `f56685ec2513933ab6465c44e40e8ce0263bc40751961aa2468da9cbcdfe7409`.
-- The full build sets `HEXAGON_SDK_ROOT`, `HEXAGON_TOOLS_ROOT`,
-  `ORG_GRADLE_PROJECT_rnllamaBuildFromSource=true` and the exact variant list from
-  `node scripts/verify-android-payload.js --print-variants`, matching upstream CI.
-- The earlier build without the SDK was stopped. App C++ objects for both ABIs
-  are cached; the full inference build is now running with the portable init script.
-- Final APK acceptance also requires `scripts/verify-android-payload.js` to pass.
-
-### Model download environment blocker
-
-- A public GGUF smoke-model download from `huggingface.co` was attempted and
-  rejected by the environment proxy (`CONNECT tunnel failed, response 403`).
-  No model was substituted with a mock or reported as running.
-- User was asked to enable the Hugging Face download domains in environment
-  settings or defer model acceptance to the physical device. APK and UI work
-  continue independently while this is pending.
-- The optional build init script uses two compile jobs for llama.rn and one for
-  other native components, with one Gradle worker and one Metro worker.
-- Fixed a Groovy GString-to-String issue in that optional resource-control
-  script; the full configuration now recognizes the pinned Hexagon SDK and
-  the exact upstream native variant list.
-
-### Verified clean baseline
-
-The detached original base at `77847397085de7af31d23c32e26d7c9aaaecea1e`
-now passes its complete original regression with Node 22 and the temporary Ruby
-runtime: **441 suites / 9,350 tests passed; 2 skipped; all 310 snapshots passed**,
-exit 0 (677.60 seconds while native compilation continued). This closes the
-initial baseline run terminated by memory pressure.
-
-### Scope audit: speech and Plus entry
-
-- Found an upstream voice-mode entry in the chat composer that could still open
-  Plus on capable devices. The LocalPal app now passes `enableVoice=false`
-  through the existing chat/input/message components, hiding recording, voice
-  mode and read-aloud controls, including saved voice-enabled preferences.
-- The app no longer initializes speech or purchases at startup. Original speech
-  components/stores and persisted data remain available for later phases.
-- Text send/stop handlers, persona system-prompt construction and local inference
-  are unchanged. TypeScript passed after this scope correction (29.67 seconds).
-- Focused app, chat, input, footer and existing speech compatibility checks passed:
-  **13 suites / 205 tests**, exit 0 (52.69 seconds).
-- Global ESLint passed with 0 errors and the same 46 original warnings (79.79 seconds).
-
-### Saved speech preferences
-
-A final source audit found that a saved `userTTSOverride=true` plus auto-speak
-could still play a reply even with speech controls hidden. `useChatSession` now
-accepts the same opt-out flag and gates both streaming speech and completion
-playback in the LocalPal flow. It preserves the saved preference, and defaults
-to the original behavior for other callers. Two hook suites / 70 tests passed,
-including normal text completion with saved auto-speak enabled and no speech
-callbacks. TypeScript passed (18.95 seconds).
-
-### Exact-source regression follow-up
-
-The final full run passed 444 suites / 9,378 tests and all 310 snapshots, but
-failed one theme-token adoption invariant. The failing consumer was the model
-card's intentional `theme.radius.l` restyle, not the composer. The invariant
-explicitly permits follow-up restyles with an exact allow-list entry and an
-architecture note. Added only that file and documented the design boundary in
-`LOCALPAL_UI_ARCHITECTURE.md`; the invariant is retained for all other files.
-A new complete run is required before declaring final automated checks passed.
+- 最终全量 Jest：**445 组 / 9,379 项通过，2 项跳过，310 个快照通过**，exit 0，310.028 秒；全局覆盖率要求保持启用。
+- 日志：`/tmp/localpal-final-verified-tests.log`；类型检查与 lint 结果见上。
+- 模拟器安装日志返回 `Performing Streamed Install` / `Success`；启动命令为 `com.pocketpalai/com.pocketpal.MainActivity`。这仅证明安装与启动命令执行，不等于所有 UI 或推理验收通过。
+- 用户选择先交付 APK，模型在真机验收，并要求直接提供 APK；已提供 `LocalPal-phase1-test.apk` 下载链接。
+- 所有源码改动已在功能分支推送并逐次核对远程 SHA；本次补全最终测试、构建与交付报告。main 保持原基线。
+- APK、JS Bundle 和临时构建工具是构建产物，未作为源码加入 Git；APK 校验值及构建依据已记录在本报告。

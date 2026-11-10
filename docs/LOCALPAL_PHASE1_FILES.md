@@ -1,8 +1,8 @@
 # LocalPal Phase 1 修改文件与备份记录
 
-所有提交均在 `feat/localpal-phase1-rebuild`，未修改 main，未使用 force push。
+所有源码提交均在 `feat/localpal-phase1-rebuild`，main 保持原基线，未使用 force push。每次推送后使用 `git ls-remote` 核对远程 SHA。
 
-每次推送后使用 `git ls-remote` 核对远程 SHA。Batch 3 的角色验证与 Batch 4 的 Markdown 合并在一次备份提交中；没有改写远程历史。
+Batch 3 的角色验证与 Batch 4 的 Markdown 合并在一次备份提交中，未改写远程历史。以下列出本次最终文档补全之前的全部提交；本次补全只修改本文件与 `LOCALPAL_PHASE1_REBUILD.md`，不改应用源码。
 
 ## docs: record LocalPal phase 1 baseline and delivery plan
 
@@ -115,3 +115,21 @@
 - `src/components/Message/Message.tsx`
 - `src/screens/ChatScreen/ChatScreen.tsx`
 - `src/screens/ChatScreen/VideoPalScreen.tsx`
+
+## fix: suppress saved auto-speak in the local chat flow
+
+提交：`3b935575b661c21cfbf58983e0aabd2de7171c25`
+
+- `docs/LOCALPAL_PHASE1_FILES.md`
+- `docs/LOCALPAL_PHASE1_REBUILD.md`
+- `src/hooks/__tests__/useChatSession.test.ts`
+- `src/hooks/useChatSession.ts`
+- `src/screens/ChatScreen/ChatScreen.tsx`
+
+## chore: document intentional LocalPal model card token adoption
+
+提交：`ac8fa3a5e4e6f980c5a6ea68bbfb0fd8c22595ec`
+
+- `docs/LOCALPAL_PHASE1_REBUILD.md`
+- `docs/LOCALPAL_UI_ARCHITECTURE.md`
+- `src/theme/tokens/__tests__/invariants.test.ts`
