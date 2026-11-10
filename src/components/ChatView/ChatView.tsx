@@ -1204,11 +1204,7 @@ export const ChatView = observer(
             {/* Chat input */}
             <Reanimated.View
               onLayout={onLayoutChatInput}
-              style={[
-                styles.inputContainer,
-                inputContainerAnimatedStyle,
-                {backgroundColor: inputBackgroundColor},
-              ]}>
+              style={[styles.inputContainer, inputContainerAnimatedStyle]}>
               <BannerRow
                 messages={messages}
                 htmlPreviewCount={htmlPreviewCount}

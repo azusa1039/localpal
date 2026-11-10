@@ -5,7 +5,7 @@ import {Theme} from '../../../utils/types';
 export const createStyles = (theme: Theme) =>
   StyleSheet.create({
     card: {
-      borderRadius: 20,
+      borderRadius: theme.radius.l,
       marginHorizontal: 12,
       marginVertical: 6,
       //overflow: 'hidden',

@@ -436,7 +436,11 @@ export const ChatInput = observer(
 
     return (
       <View style={styles.container}>
-        <View style={styles.inputContainer}>
+        <View
+          style={[
+            styles.inputContainer,
+            {backgroundColor: inputBackgroundColor ?? theme.colors.surface},
+          ]}>
           {/* Edit Bar (when in edit mode) */}
           {isEditMode && (
             <Animated.View

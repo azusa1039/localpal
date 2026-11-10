@@ -138,3 +138,31 @@ Android runtime; these will only be marked verified when executed.
 - Additional changed-test lint: passed.
 - Source implementation and all automated regression checks are complete;
   native build, emulator screenshots and physical-device acceptance remain open.
+
+### Android bundle verification
+
+- Production-mode Android JS bundle passed using the repository's `.nvmrc`
+  Node 22.21.0, a 5 GiB Node heap, one Metro worker and `--minify false`
+  (the same minification mode used by the existing Hermes release task).
+- Bundle: `/workspace/localpal-artifacts/index.android.bundle`; 48 assets copied.
+- SHA256: `b58501ba73bb1410ca23199492ab3204085c39286334c9efeed11942d32e07ac`.
+- The earlier Node 24 attempts with 2/3 GiB heaps failed with V8 heap exhaustion.
+  No application dependencies were upgraded to resolve this.
+- APK build now uses Node 22, one Gradle/Metro worker and temporary CMake job
+  pools to fit the environment. Resource limits are outside source; native
+  inference settings and model data are unchanged.
+- Emulator tools and an Android 11 x86_64 AVD are installed. The emulator connected
+  to ADB, but was stopped before app installation to release build memory.
+  This is not counted as application runtime verification.
+
+### Composer visual follow-up
+
+- Moved the background from the outer composer wrapper to the rounded input
+  itself, keeping persona background colors and the floating outline visible.
+  Model cards now use the existing `theme.radius.l` token.
+- Focused input/chat/model-card regression: 3 suites / 121 tests passed.
+  Changed-file ESLint passed with no new warnings. Final TypeScript check passed
+  using Node 22.21.0 (13.26 seconds).
+- The production-mode JS bundle was regenerated successfully after this polish.
+- Android runtime acceptance steps: `LOCALPAL_ANDROID_ACCEPTANCE.md`.
+  Original user plan: `LOCALPAL_PHASE1_REQUEST.md`.
