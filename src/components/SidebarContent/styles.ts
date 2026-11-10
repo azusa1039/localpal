@@ -8,6 +8,17 @@ export const createStyles = (theme: MD3Theme) =>
       flex: 1,
       backgroundColor: theme.colors.surface,
     },
+    brand: {
+      paddingHorizontal: 24,
+      paddingTop: 20,
+      paddingBottom: 24,
+      fontWeight: '600',
+    },
+    footer: {
+      paddingTop: 12,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: theme.colors.outline,
+    },
     divider: {
       marginHorizontal: 16,
       backgroundColor: theme.colors.onSurfaceVariant,

@@ -2,7 +2,7 @@ import React, {useContext} from 'react';
 import {Alert, Keyboard, View} from 'react-native';
 
 import {observer} from 'mobx-react';
-import {Icon, IconButton, useTheme} from 'react-native-paper';
+import {IconButton, useTheme} from 'react-native-paper';
 
 import {
   // ClockFastForwardIcon,
@@ -10,7 +10,6 @@ import {
   DuplicateIcon,
   EditBoxIcon,
   EditIcon,
-  GridIcon,
   SettingsIcon,
   ShareIcon,
   TrashIcon,
@@ -19,10 +18,9 @@ import {
 import {Menu} from '../Menu';
 import {styles} from './styles';
 
-import {chatSessionStore, modelStore, uiStore} from '../../store';
+import {chatSessionStore, uiStore} from '../../store';
 
 import {L10nContext} from '../../utils';
-import {Model, ModelOrigin} from '../../utils/types';
 import {t} from '../../locales';
 import {importChatSessions} from '../../utils/importUtils';
 import {
@@ -33,11 +31,13 @@ import {
 
 import {RenameModal, UsageStats} from '..';
 import {ChatGenerationSettingsSheet} from '..';
+import {PersonaSettingsSheet} from '../PersonaSettingsSheet';
 
 export const HeaderRight: React.FC = observer(() => {
   const theme = useTheme();
   const [menuVisible, setMenuVisible] = React.useState(false);
   const [renameModalVisible, setRenameModalVisible] = React.useState(false);
+  const [personasVisible, setPersonasVisible] = React.useState(false);
   const [chatGenerationSettingsVisible, setChatGenerationSettingsVisible] =
     React.useState(false);
 
@@ -50,16 +50,9 @@ export const HeaderRight: React.FC = observer(() => {
   const closeMenu = () => setMenuVisible(false);
   const l10n = useContext(L10nContext);
 
-  const models = modelStore.availableModels;
-  const activeModelId = modelStore.activeModelId;
   const session = chatSessionStore.sessions.find(
     s => s.id === chatSessionStore.activeSessionId,
   );
-
-  const onSelectModel = (model: Model) => {
-    modelStore.selectModel(model);
-    closeMenu();
-  };
 
   const onPressGenerationSettings = () => {
     setChatGenerationSettingsVisible(true);
@@ -160,6 +153,7 @@ export const HeaderRight: React.FC = observer(() => {
       {uiStore.displayMemUsage && <UsageStats width={40} height={20} />}
       <IconButton
         icon={() => <EditBoxIcon stroke={theme.colors.primary} />}
+        accessibilityLabel={l10n.localpal.newChat}
         testID="reset-button"
         style={styles.chatBtn}
         onPress={() => {
@@ -175,7 +169,8 @@ export const HeaderRight: React.FC = observer(() => {
             icon={() => <DotsVerticalIcon fill={theme.colors.primary} />}
             style={styles.menuBtn}
             onPress={openMenu}
-            testID="menu-button"
+            accessibilityLabel={l10n.components.headerRight.generationSettings}
+            testID="chat-overflow-button"
           />
         }>
         <Menu.Item
@@ -184,33 +179,11 @@ export const HeaderRight: React.FC = observer(() => {
           leadingIcon={() => <SettingsIcon stroke={theme.colors.primary} />}
         />
         <Menu.Item
-          disabled={models.length === 0}
-          submenu={models.map(model => (
-            <Menu.Item
-              label={
-                model.origin === ModelOrigin.REMOTE
-                  ? `${model.name} (${model.serverName})`
-                  : model.name
-              }
-              onPress={() => onSelectModel(model)}
-              key={model.id}
-              selectable
-              selected={model.id === activeModelId}
-              leadingIcon={
-                model.origin === ModelOrigin.REMOTE
-                  ? () => (
-                      <Icon
-                        source="cloud-outline"
-                        size={16}
-                        color={theme.colors.secondary}
-                      />
-                    )
-                  : undefined
-              }
-            />
-          ))}
-          label={l10n.components.headerRight.model}
-          leadingIcon={() => <GridIcon stroke={theme.colors.primary} />}
+          label={l10n.localpal.personas}
+          onPress={() => {
+            closeMenu();
+            setPersonasVisible(true);
+          }}
         />
         {session?.id && (
           <>
@@ -276,6 +249,12 @@ export const HeaderRight: React.FC = observer(() => {
         isVisible={chatGenerationSettingsVisible}
         onClose={() => setChatGenerationSettingsVisible(false)}
       />
+      {personasVisible && (
+        <PersonaSettingsSheet
+          isVisible
+          onClose={() => setPersonasVisible(false)}
+        />
+      )}
       {session && (
         <RenameModal
           visible={renameModalVisible}

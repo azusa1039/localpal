@@ -1,4 +1,16 @@
 {
+  "localpal": {
+    "newChat": "New chat",
+    "edit": "Edit",
+    "personas": "Personalization",
+    "managePersonas": "Manage personas",
+    "newPersona": "New persona",
+    "noPersona": "Default assistant",
+    "moreSettings": "More settings",
+    "back": "Back to settings",
+    "localModels": "Local models",
+    "localModelsDescription": "Download, import and configure GGUF models on this device"
+  },
   "common": {
     "cancel": "Cancel",
     "delete": "Delete",

@@ -75,9 +75,9 @@ describe('SidebarContent Component', () => {
     const {getByText, queryByText} = render(<TestNavigator />);
 
     // Navigate to a differnet page (as the default is chat screen)
-    fireEvent.press(getByText('Models'));
+    fireEvent.press(getByText('Settings'));
     expect(queryByText('Chat Screen')).toBeNull();
-    expect(getByText('Models Screen')).toBeTruthy();
+    expect(getByText('Settings Screen')).toBeTruthy();
 
     // Pressing a session should navigate to the Chat screen
     fireEvent.press(getByText('Session 1'));
@@ -105,24 +105,17 @@ describe('SidebarContent Component', () => {
     it('after pressing the Chat item', async () => {
       const {getByText, getByTestId} = await renderOpenDrawerOnChat();
 
-      fireEvent.press(getByTestId('drawer-item-chat'));
+      fireEvent.press(getByTestId('drawer-item-new-chat'));
 
       await waitFor(() => expect(getByText('drawer:closed')).toBeTruthy());
     });
   });
 
-  it('navigates to correct screen from drawer items', () => {
-    const {getByText, queryByText} = render(<TestNavigator />);
-
-    // Ensure the Models screen is rendered by pressing the 'Models' drawer item
-    fireEvent.press(getByText('Models'));
-    expect(getByText('Models Screen')).toBeTruthy();
-    expect(queryByText('Chat Screen')).toBeNull();
-
-    // Ensure the Settings screen is rendered by pressing the 'Settings' drawer item
-    fireEvent.press(getByText('Settings'));
+  it('opens settings from its fixed footer', () => {
+    const {getByTestId, getByText, queryByText} = render(<TestNavigator />);
+    fireEvent.press(getByTestId('drawer-item-settings'));
     expect(getByText('Settings Screen')).toBeTruthy();
-    expect(queryByText('Models Screen')).toBeNull();
+    expect(queryByText('Chat Screen')).toBeNull();
   });
 
   describe('Selection Mode', () => {

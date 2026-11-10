@@ -18,8 +18,8 @@
 
 | Batch | Scope | Status |
 | --- | --- | --- |
-| 0 | Baseline, environment, feature branch, remote backup | In progress |
-| 1 | Chat shell, drawer, composer, model dropdown, overflow | Pending |
+| 0 | Baseline, environment, feature branch, remote backup | Branch backed up; clean regression running |
+| 1 | Chat shell, drawer, composer, model dropdown, overflow | Implemented; native visual acceptance pending |
 | 2 | Settings and local model management integration | Pending |
 | 3 | Existing streaming, history, personas, generation and import/export | Pending |
 | 4 | Markdown and standalone italic paragraphs | Pending |
@@ -27,8 +27,31 @@
 
 ## Validation record
 
-Baseline TypeScript, ESLint and full Jest commands were started before source
-changes. Results and batch file lists will be added as checks finish.
+Baseline TypeScript passed. Baseline ESLint passed with 46 existing warnings.
+The first full Jest run overlapped source edits and is not treated as a pristine
+baseline (436 suites passed; 5 failed from changed UI contracts, a new locale
+section and unavailable Ruby). A clean detached worktree at the base SHA is
+running the original tests separately, with a temporary local Ruby runtime.
+
+### Batch 1 — chat shell
+
+- Files: `ChatHeader/styles.ts`, `ChatHeaderTitle/*`, `HeaderRight/*`,
+  `SidebarContent/*`, `ChatInput/styles.ts`, `ChatView/styles.ts`,
+  `ChatEmptyPlaceholder/ChatEmptyPlaceholder.tsx`, `PersonaSettingsSheet.tsx`,
+  Android `strings.xml`, English labels and corresponding locale tests.
+- Chat header model dropdown lists installed local models and calls
+  `ModelStore.selectModel`. Loading status and an always-available model
+  management action are shown; switching is disabled during generation/loading.
+- Drawer: LocalPal, new chat, grouped local history, fixed settings footer.
+  Rename/delete/pin/bulk export remain on the existing history implementation.
+- Overflow: generation settings, personalization, existing conversation
+  operations, import/export. Duplicate model submenu removed.
+- Composer uses a floating rounded field; decorative empty-state logo removed.
+- Focused chat/drawer/locale checks: 6 suites, 144 tests passed using
+  `jest --runInBand --coverage=false`. Focused runs disable the global coverage
+  threshold; full regression retains the repository coverage requirements.
+- TypeScript passed; ESLint passed with the same 46 pre-existing warnings.
+- Native screenshot acceptance is pending the Android runtime setup.
 
 The image is a layout reference, not proof of a running LocalPal build. Device
 screenshots, APK installation and local model inference require an actual

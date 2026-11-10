@@ -49,7 +49,7 @@ describe('HeaderRight', () => {
     const {queryByTestId} = renderWithI18n(<HeaderRight />);
     expect(queryByTestId('usage-stats')).toBeNull();
     expect(queryByTestId('reset-button')).toBeTruthy();
-    expect(queryByTestId('menu-button')).toBeTruthy();
+    expect(queryByTestId('chat-overflow-button')).toBeTruthy();
   });
 
   it('renders UsageStats when displayMemUsage is true', () => {
@@ -57,7 +57,7 @@ describe('HeaderRight', () => {
     const {queryByTestId} = renderWithI18n(<HeaderRight />);
     expect(queryByTestId('usage-stats')).toBeTruthy();
     expect(queryByTestId('reset-button')).toBeTruthy();
-    expect(queryByTestId('menu-button')).toBeTruthy();
+    expect(queryByTestId('chat-overflow-button')).toBeTruthy();
   });
 
   it('calls resetActiveSession when reset button is pressed', () => {
@@ -73,7 +73,7 @@ describe('HeaderRight', () => {
   describe('Menu functionality', () => {
     it('opens menu when menu button is pressed', () => {
       const {getByTestId} = renderWithI18n(<HeaderRight />);
-      const menuButton = getByTestId('menu-button');
+      const menuButton = getByTestId('chat-overflow-button');
       fireEvent.press(menuButton);
       // Menu should be visible now
       expect(getByTestId('menu-view')).toBeTruthy();
@@ -104,15 +104,13 @@ describe('HeaderRight', () => {
 
       it('shows session-specific menu items', async () => {
         const {getByTestId, findByText} = renderWithI18n(<HeaderRight />);
-        const menuButton = getByTestId('menu-button');
+        const menuButton = getByTestId('chat-overflow-button');
         fireEvent.press(menuButton);
 
         expect(
           await findByText(l10n.en.components.headerRight.generationSettings),
         ).toBeTruthy();
-        expect(
-          await findByText(l10n.en.components.headerRight.model),
-        ).toBeTruthy();
+        expect(await findByText(l10n.en.localpal.personas)).toBeTruthy();
         expect(
           await findByText(l10n.en.components.headerRight.duplicateChatHistory),
         ).toBeTruthy();
@@ -122,7 +120,7 @@ describe('HeaderRight', () => {
 
       it('handles generation settings press', async () => {
         const {getByTestId, findByText} = renderWithI18n(<HeaderRight />);
-        const menuButton = getByTestId('menu-button');
+        const menuButton = getByTestId('chat-overflow-button');
         fireEvent.press(menuButton);
 
         const settingsButton = await findByText(
@@ -135,7 +133,7 @@ describe('HeaderRight', () => {
 
       it('handles delete action with confirmation', async () => {
         const {getByTestId, findByText} = renderWithI18n(<HeaderRight />);
-        const menuButton = getByTestId('menu-button');
+        const menuButton = getByTestId('chat-overflow-button');
         fireEvent.press(menuButton);
 
         const deleteButton = await findByText('Delete');
@@ -171,7 +169,7 @@ describe('HeaderRight', () => {
 
       it('handles duplicate action', async () => {
         const {getByTestId, findByText} = renderWithI18n(<HeaderRight />);
-        const menuButton = getByTestId('menu-button');
+        const menuButton = getByTestId('chat-overflow-button');
         fireEvent.press(menuButton);
 
         const duplicateButton = await findByText('Duplicate chat history');

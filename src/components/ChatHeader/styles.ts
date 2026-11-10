@@ -18,12 +18,13 @@ export const createStyles = ({
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      gap: 10,
+      gap: 4,
+      paddingHorizontal: 8,
     },
     leftSection: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 10,
+      gap: 4,
       flexShrink: 1,
     },
     menuIcon: {

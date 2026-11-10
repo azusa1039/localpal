@@ -8,29 +8,20 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import {useTheme} from '../../hooks';
 import {createStyles} from './styles';
-import {PlusDrawerItem} from './PlusDrawerItem/PlusDrawerItem';
 import {chatSessionStore, SessionMetaData} from '../../store';
 import {Menu, RenameModal, Checkbox} from '..';
 import {
-  BenchmarkIcon,
   ChatIcon,
   EditIcon,
-  ModelIcon,
-  PalIcon,
   SettingsIcon,
   ShareIcon,
   StarIcon,
   TrashIcon,
-  AppInfoIcon,
 } from '../../assets/icons';
 import {L10nContext} from '../../utils';
 import {t} from '../../locales';
 import {ROUTES} from '../../utils/navigationConstants';
 import {exportChatSession} from '../../utils/exportUtils';
-import {openPlus} from '../../services/plus/gate';
-
-// Check if app is in debug mode
-const isDebugMode = __DEV__;
 
 // Session item props interface
 interface SessionItemProps {
@@ -543,99 +534,27 @@ export const SidebarContent: React.FC<DrawerContentComponentProps> = observer(
       ],
     );
 
-    // List header with main menu items
-    const ListHeaderComponent = React.useMemo(
-      () => (
-        <View>
-          <Drawer.Section showDivider={false}>
-            <Drawer.Item
-              label={l10n.components.sidebarContent.menuItems.chat}
-              icon={() => <ChatIcon stroke={theme.colors.primary} />}
-              onPress={() => navigateTo(ROUTES.CHAT)}
-              style={styles.menuDrawerItem}
-              testID="drawer-item-chat"
-            />
-            <Drawer.Item
-              label={l10n.components.sidebarContent.menuItems.pals}
-              icon={() => <PalIcon stroke={theme.colors.primary} />}
-              onPress={() => navigateTo(ROUTES.PALS)}
-              style={styles.menuDrawerItem}
-              testID="drawer-item-pals"
-            />
-            <Drawer.Item
-              label={l10n.components.sidebarContent.menuItems.models}
-              icon={() => <ModelIcon stroke={theme.colors.primary} />}
-              onPress={() => navigateTo(ROUTES.MODELS)}
-              style={styles.menuDrawerItem}
-              testID="drawer-item-models"
-            />
-            <Drawer.Item
-              label={l10n.components.sidebarContent.menuItems.benchmark}
-              icon={() => <BenchmarkIcon stroke={theme.colors.primary} />}
-              onPress={() => navigateTo(ROUTES.BENCHMARK)}
-              style={styles.menuDrawerItem}
-              testID="drawer-item-benchmark"
-            />
-            <Drawer.Item
-              label={l10n.components.sidebarContent.menuItems.settings}
-              icon={() => (
-                <SettingsIcon
-                  width={24}
-                  height={24}
-                  stroke={theme.colors.primary}
-                />
-              )}
-              onPress={() => navigateTo(ROUTES.SETTINGS)}
-              style={styles.menuDrawerItem}
-              testID="drawer-item-settings"
-            />
-            <PlusDrawerItem
-              onPress={() => {
-                props.navigation.closeDrawer();
-                openPlus();
-              }}
-            />
-            <Drawer.Item
-              label={l10n.components.sidebarContent.menuItems.appInfo}
-              icon={() => (
-                <AppInfoIcon
-                  width={24}
-                  height={24}
-                  stroke={theme.colors.primary}
-                />
-              )}
-              onPress={() => navigateTo(ROUTES.APP_INFO)}
-              style={styles.menuDrawerItem}
-            />
-            {/* Only show Dev Tools in debug mode */}
-            {isDebugMode && (
-              <Drawer.Item
-                label="Dev Tools"
-                icon={() => (
-                  <SettingsIcon
-                    width={24}
-                    height={24}
-                    stroke={theme.colors.primary}
-                  />
-                )}
-                onPress={() => navigateTo(ROUTES.DEV_TOOLS)}
-                style={styles.menuDrawerItem}
-              />
-            )}
-          </Drawer.Section>
-          <Divider style={styles.divider} />
-        </View>
-      ),
-      [l10n, theme, styles, navigateTo, props.navigation],
+    const ListHeaderComponent = (
+      <View>
+        <Text variant="titleLarge" style={styles.brand}>
+          LocalPal
+        </Text>
+        <Drawer.Item
+          label={l10n.localpal.newChat}
+          icon={() => <ChatIcon stroke={theme.colors.onSurface} />}
+          onPress={() => {
+            chatSessionStore.resetActiveSession();
+            navigateTo(ROUTES.CHAT);
+          }}
+          style={styles.menuDrawerItem}
+          testID="drawer-item-new-chat"
+        />
+      </View>
     );
 
     return (
       <GestureHandlerRootView style={styles.sidebarContainer}>
-        <View
-          style={[
-            styles.contentWrapper,
-            {paddingTop: insets.top, paddingBottom: insets.bottom},
-          ]}>
+        <View style={[styles.contentWrapper, {paddingTop: insets.top}]}>
           {chatSessionStore.isSelectionMode ? (
             <>
               <SelectionModeHeader
@@ -678,6 +597,15 @@ export const SidebarContent: React.FC<DrawerContentComponentProps> = observer(
               contentContainerStyle={styles.scrollViewContent}
             />
           )}
+        </View>
+        <View
+          style={[styles.footer, {paddingBottom: Math.max(insets.bottom, 12)}]}>
+          <Drawer.Item
+            label={l10n.components.sidebarContent.menuItems.settings}
+            icon={() => <SettingsIcon stroke={theme.colors.onSurface} />}
+            onPress={() => navigateTo(ROUTES.SETTINGS)}
+            testID="drawer-item-settings"
+          />
         </View>
         <RenameModal
           visible={sessionToRename !== null}

@@ -15,6 +15,7 @@ import type {Translations} from '../types';
 import type {AvailableLanguage} from '../index';
 
 const EXPECTED_SECTIONS = [
+  'localpal',
   'common',
   'settings',
   'memory',

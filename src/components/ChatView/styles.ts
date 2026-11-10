@@ -58,14 +58,9 @@ export const createStyles = ({theme}: {theme: Theme}) =>
       borderTopRightRadius: theme.borders.inputBorderRadius,
       position: 'absolute',
       zIndex: 10,
-      left: 0,
-      right: 0,
+      left: 12,
+      right: 12,
       bottom: 0,
-      ...(!theme.dark
-        ? {
-            boxShadow: `0px -2px 8px ${theme.colors.shadow}1A`,
-          }
-        : {}),
     },
     chatContainer: {
       flex: 1,
