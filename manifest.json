@@ -1,0 +1,38 @@
+{
+  "apk": "LocalPal-phase1-test.apk",
+  "bytes": 275944815,
+  "sha256": "9bcff5111bbcb77fde45d8915fd1865ea466421849c3cef19f313c4bc0bc6c7f",
+  "sourceCommit": "27e66d6341612e1b1d4d064070c824f1d29e2deb",
+  "parts": [
+    {
+      "name": "LocalPal.apk.part01",
+      "bytes": 46137344,
+      "sha256": "d9e35191a23a816c90fd8ffa643961f83dbb44ebb8a911842fddc84ff9dfffea"
+    },
+    {
+      "name": "LocalPal.apk.part02",
+      "bytes": 46137344,
+      "sha256": "b05f8e01e36143c2aded5c6467ac518372b019bac83dbe679c9086a3268cc979"
+    },
+    {
+      "name": "LocalPal.apk.part03",
+      "bytes": 46137344,
+      "sha256": "10847b0c78d346dea715932904a06e35304bc3b5132d749bb13b69f20918f3aa"
+    },
+    {
+      "name": "LocalPal.apk.part04",
+      "bytes": 46137344,
+      "sha256": "beb3acd552d194967ac3c1f158d943d2912bb29acab98c5a33a182f88d39ca5f"
+    },
+    {
+      "name": "LocalPal.apk.part05",
+      "bytes": 46137344,
+      "sha256": "734e0bbc055933a10b701394b5f6861a522e1dc5147cd0203b3f612e7fd08dc8"
+    },
+    {
+      "name": "LocalPal.apk.part06",
+      "bytes": 45258095,
+      "sha256": "deec8aa5f746fc3e2dfa3c1bce15239e7bc0711a6104afa4dfe20929b220bdb8"
+    }
+  ]
+}
