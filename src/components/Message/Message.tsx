@@ -30,6 +30,8 @@ const hapticOptions = {
 };
 
 export interface MessageTopLevelProps extends TextMessageTopLevelProps {
+  /** Offer speech controls; disabled in the LocalPal Phase 1 chat flow. */
+  enableVoice?: boolean;
   /**
    * True if THIS row is the active agent run. Computed once at the
    * ChatView level (last message AND `agentUiState.status` is in the
@@ -108,6 +110,7 @@ export interface MessageProps extends MessageTopLevelProps {
 export const Message = observer(
   ({
     enableAnimation,
+    enableVoice = true,
     // isActiveRun / activeRunPendingTalentNames / isGeneratingToolCall
     // are kept on MessageTopLevelProps for ChatView's prop API but not
     // consumed here — pending UX is owned by ChatView's PendingIndicator
@@ -406,12 +409,16 @@ export const Message = observer(
       message.type === 'assistant_turn' ? (
         <View style={{width: messageWidth}}>
           {renderAssistantTurn()}
-          {showAssistantFooter && <AssistantTurnFooter message={message} />}
+          {showAssistantFooter && (
+            <AssistantTurnFooter message={message} enableVoice={enableVoice} />
+          )}
         </View>
       ) : (
         <>
           {renderBubbleContainer()}
-          {showAssistantFooter && <AssistantTurnFooter message={message} />}
+          {showAssistantFooter && (
+            <AssistantTurnFooter message={message} enableVoice={enableVoice} />
+          )}
         </>
       );
 

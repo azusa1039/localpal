@@ -62,7 +62,10 @@ const renderBubble = ({
   />
 );
 
-export const ChatScreen: React.FC = observer(() => {
+type ChatScreenProps = {enableVoice?: boolean};
+
+export const ChatScreen: React.FC<ChatScreenProps> = observer(props => {
+  const {enableVoice = true} = props;
   const currentMessageInfo = useRef<{
     createdAt: number;
     id: string;
@@ -299,11 +302,12 @@ export const ChatScreen: React.FC = observer(() => {
 
   // If the active pal is a video pal, show the video pal screen
   if (isVideoPal) {
-    return <VideoPalScreen activePal={activePal} />;
+    return <VideoPalScreen activePal={activePal} enableVoice={enableVoice} />;
   }
 
-  const teaserOpen = voiceMode.sheet?.kind === 'teaser';
-  const chatCovered = voiceModeStore.isFullViewOpen || teaserOpen;
+  const teaserOpen = enableVoice && voiceMode.sheet?.kind === 'teaser';
+  const chatCovered =
+    enableVoice && (voiceModeStore.isFullViewOpen || teaserOpen);
 
   // Otherwise, show the regular chat view
   return (
@@ -313,6 +317,7 @@ export const ChatScreen: React.FC = observer(() => {
         importantForAccessibility={chatCovered ? 'no-hide-descendants' : 'auto'}
         accessibilityElementsHidden={chatCovered}>
         <ChatView
+          enableVoice={enableVoice}
           renderBubble={renderBubble}
           messages={chatSessionStore.currentSessionMessages}
           activePal={activePal}
@@ -327,7 +332,7 @@ export const ChatScreen: React.FC = observer(() => {
           isVisionEnabled={visionEnabled}
           initialInputText={pendingMessage || undefined}
           onInitialTextConsumed={clearPendingMessage}
-          onVoiceModePress={voiceMode.requestEntry}
+          onVoiceModePress={enableVoice ? voiceMode.requestEntry : undefined}
           inputProps={{
             showThinkingToggle: thinkingSupported,
             isThinkingEnabled: thinkingEnabled,
@@ -346,7 +351,7 @@ export const ChatScreen: React.FC = observer(() => {
           }}
         />
       </View>
-      {voiceModeStore.isFullViewOpen && <VoiceModeView />}
+      {enableVoice && voiceModeStore.isFullViewOpen && <VoiceModeView />}
       {teaserOpen && (
         <VoiceTeaser
           onGetPlus={voiceMode.getPlus}
@@ -355,12 +360,16 @@ export const ChatScreen: React.FC = observer(() => {
         />
       )}
       <VoiceSetupSheet
-        isVisible={voiceMode.sheet?.kind === 'setup'}
+        isVisible={enableVoice && voiceMode.sheet?.kind === 'setup'}
         onClose={handleCloseVoiceSetup}
         onDone={voiceMode.setupDone}
       />
       <VoiceMemorySheet
-        fit={voiceMode.sheet?.kind === 'memory' ? voiceMode.sheet.fit : null}
+        fit={
+          enableVoice && voiceMode.sheet?.kind === 'memory'
+            ? voiceMode.sheet.fit
+            : null
+        }
         chatModelName={modelStore.activeModel?.name ?? ''}
         voiceName={ttsStore.currentVoice?.name ?? ''}
         onClose={handleCloseVoiceMemory}

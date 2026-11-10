@@ -54,6 +54,8 @@ import {
 } from '..';
 
 export interface ChatInputTopLevelProps {
+  /** Offer speech controls; disabled in the LocalPal Phase 1 flow. */
+  enableVoice?: boolean;
   /** Whether the AI is currently streaming tokens */
   isStreaming?: boolean;
   /** Will be called on {@link SendButton} tap. Has {@link MessageType.PartialText} which can
@@ -142,6 +144,7 @@ const hapticOptions = {
 export const ChatInput = observer(
   ({
     isStreaming = false,
+    enableVoice = true,
     onSendPress,
     onStopPress,
     onCancelEdit,
@@ -185,8 +188,9 @@ export const ChatInput = observer(
       onTranscript: appendTranscript ?? (() => {}),
     });
     const isVoiceCaptureActive =
-      asrStore.captureState === 'recording' ||
-      asrStore.captureState === 'transcribing';
+      enableVoice &&
+      (asrStore.captureState === 'recording' ||
+        asrStore.captureState === 'transcribing');
 
     // Camera permission hook from react-native-vision-camera
     const {hasPermission, requestPermission} = useCameraPermission();
@@ -403,6 +407,7 @@ export const ChatInput = observer(
     const isSendButtonEnabled =
       value.trim().length > 0 && hasActiveModel && !isStopping;
     const isVoiceModeButtonVisible =
+      enableVoice &&
       !!onVoicePress &&
       voiceModeStore.supported &&
       !value.trim() &&
@@ -715,11 +720,11 @@ export const ChatInput = observer(
                 {/* Voice chip (TTS) — always present so users can stop
                   audio independently of text generation. Self-gates:
                   returns null when TTS is unavailable. */}
-                <VoiceChip />
+                {enableVoice && <VoiceChip />}
 
                 {/* Voice input (ASR) mic. Self-gates: returns null when voice
                   input is unavailable. */}
-                {appendTranscript && (
+                {enableVoice && appendTranscript && (
                   <MicButton
                     onStart={voiceCapture.start}
                     style={styles.micBeforeSend}

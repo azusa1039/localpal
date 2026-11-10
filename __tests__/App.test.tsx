@@ -36,6 +36,25 @@ it('renders correctly', () => {
   expect(result.queryByTestId('hydration-splash')).toBeNull();
 });
 
+it('opens LocalPal chat without voice or Plus entry on a voice-capable device', () => {
+  const {voiceModeStore} = require('../src/store');
+  const previous = voiceModeStore.userVoiceModeOverride;
+  runInAction(() => {
+    voiceModeStore.userVoiceModeOverride = true;
+  });
+  const result = render(<App />);
+  try {
+    expect(result.queryByTestId('voice-mode-button')).toBeNull();
+    expect(result.queryByTestId('drawer-item-plus')).toBeNull();
+    expect(result.getByTestId('drawer-item-new-chat')).toBeTruthy();
+  } finally {
+    result.unmount();
+    runInAction(() => {
+      voiceModeStore.userVoiceModeOverride = previous;
+    });
+  }
+});
+
 it('renders hydration splash while UIStore is not hydrated', () => {
   __setHydrated(false);
   const result = render(<App />);

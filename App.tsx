@@ -20,7 +20,7 @@ import {
   GestureHandlerRootView,
 } from 'react-native-gesture-handler';
 
-import {asrStore, purchaseStore, ttsStore, uiStore} from './src/store';
+import {uiStore} from './src/store';
 import {useTheme} from './src/hooks';
 import {useDeepLinking} from './src/hooks/useDeepLinking';
 import {useNavigationBarAppearance} from './src/hooks/useNavigationBarAppearance';
@@ -71,6 +71,7 @@ if (__E2E__) {
   plusShipOverride.restore();
 }
 
+const LocalChatScreen = () => <ChatScreen enableVoice={false} />;
 const LocalSettingsScreen = () => <SettingsScreen localOnly />;
 const LocalModelsScreen = () => <ModelsScreen localOnly />;
 const Drawer = createDrawerNavigator();
@@ -102,23 +103,6 @@ const App = observer(() => {
   // Initialize locale with the current language
   React.useEffect(() => {
     initLocale(uiStore.language);
-  }, []);
-
-  // Initialize TTS store (memory gate + AppState/session listeners).
-  // Fire-and-forget: `init()` is idempotent and swallows its own errors.
-  React.useEffect(() => {
-    ttsStore.init().catch(() => {
-      // init() swallows its own errors; catch to satisfy no-floating-promises.
-    });
-    asrStore.init().catch(() => {
-      // init() swallows its own errors; catch to satisfy no-floating-promises.
-    });
-  }, []);
-
-  React.useEffect(() => {
-    purchaseStore
-      .start(__E2E__ ? {store: fakeStore, beforeInit: fakeStore.restore} : {})
-      .catch(error => console.warn('Purchase recovery failed:', error));
   }, []);
 
   return (
@@ -155,7 +139,7 @@ const App = observer(() => {
                             )}>
                             <Drawer.Screen
                               name={ROUTES.CHAT}
-                              component={gestureHandlerRootHOC(ChatScreen)}
+                              component={gestureHandlerRootHOC(LocalChatScreen)}
                               options={{
                                 headerShown: false,
                               }}

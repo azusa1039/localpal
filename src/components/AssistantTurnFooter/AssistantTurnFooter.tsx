@@ -27,10 +27,11 @@ const hapticOptions = {
 
 interface AssistantTurnFooterProps {
   message: MessageType.Any;
+  enableVoice?: boolean;
 }
 
 export const AssistantTurnFooter: React.FC<AssistantTurnFooterProps> = observer(
-  ({message}) => {
+  ({message, enableVoice = true}) => {
     const theme = useTheme();
     const l10n = useContext(L10nContext);
     const {copyable, interrupted, truncationLikely, completionResult} =
@@ -122,7 +123,7 @@ export const AssistantTurnFooter: React.FC<AssistantTurnFooterProps> = observer(
 
     return (
       <View style={componentStyles.container} testID="assistant-turn-footer">
-        <PlayButton message={message} />
+        {enableVoice && <PlayButton message={message} />}
         {copyable && (
           <TouchableOpacity onPress={copyToClipboard} testID="footer-copy">
             <CopyIcon

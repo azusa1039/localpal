@@ -13,9 +13,11 @@ import {hasVideoCapability} from '../../utils/pal-capabilities';
 
 interface VideoPalScreenProps {
   activePal: Pal;
+  enableVoice?: boolean;
 }
 
-export const VideoPalScreen = observer(({activePal}: VideoPalScreenProps) => {
+export const VideoPalScreen = observer((props: VideoPalScreenProps) => {
+  const {activePal, enableVoice = true} = props;
   const l10n = useContext(L10nContext);
 
   const contextUser = useContext(UserContext);
@@ -260,6 +262,7 @@ export const VideoPalScreen = observer(({activePal}: VideoPalScreenProps) => {
         ) : (
           // Regular chat view when camera is not active
           <ChatView
+            enableVoice={enableVoice}
             messages={[]}
             onSendPress={() => {}}
             onStopPress={() => modelStore.abortActiveGeneration()}

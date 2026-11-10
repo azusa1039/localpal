@@ -18,7 +18,7 @@
 
 | Batch | Scope | Status |
 | --- | --- | --- |
-| 0 | Baseline, environment, feature branch, remote backup | Branch backed up; clean regression running |
+| 0 | Baseline, environment, feature branch, remote backup | Complete: clean baseline regression passed |
 | 1 | Chat shell, drawer, composer, model dropdown, overflow | Implemented; native visual acceptance pending |
 | 2 | Settings and local model management integration | Implemented; device inference pending |
 | 3 | Existing streaming, history, personas, generation and import/export | Integration tests passed; device persistence pending |
@@ -224,3 +224,25 @@ upstream debug-signing fallback and should be treated as test APKs.
 - Fixed a Groovy GString-to-String issue in that optional resource-control
   script; the full configuration now recognizes the pinned Hexagon SDK and
   the exact upstream native variant list.
+
+### Verified clean baseline
+
+The detached original base at `77847397085de7af31d23c32e26d7c9aaaecea1e`
+now passes its complete original regression with Node 22 and the temporary Ruby
+runtime: **441 suites / 9,350 tests passed; 2 skipped; all 310 snapshots passed**,
+exit 0 (677.60 seconds while native compilation continued). This closes the
+initial baseline run terminated by memory pressure.
+
+### Scope audit: speech and Plus entry
+
+- Found an upstream voice-mode entry in the chat composer that could still open
+  Plus on capable devices. The LocalPal app now passes `enableVoice=false`
+  through the existing chat/input/message components, hiding recording, voice
+  mode and read-aloud controls, including saved voice-enabled preferences.
+- The app no longer initializes speech or purchases at startup. Original speech
+  components/stores and persisted data remain available for later phases.
+- Text send/stop handlers, persona system-prompt construction and local inference
+  are unchanged. TypeScript passed after this scope correction (29.67 seconds).
+- Focused app, chat, input, footer and existing speech compatibility checks passed:
+  **13 suites / 205 tests**, exit 0 (52.69 seconds).
+- Global ESLint passed with 0 errors and the same 46 original warnings (79.79 seconds).

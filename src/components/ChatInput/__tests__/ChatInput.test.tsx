@@ -1100,6 +1100,17 @@ describe('voice mode button', () => {
     });
   });
 
+  it('hides speech and Plus entry when the local chat flow disables voice', () => {
+    voiceModeStore.setUnlockOverride(false);
+    const {queryByTestId} = renderInput({
+      enableVoice: false,
+      appendTranscript: jest.fn(),
+    });
+    expect(queryByTestId('voice-mode-button')).toBeNull();
+    expect(queryByTestId('voice-mode-lock')).toBeNull();
+    expect(queryByTestId('mic-button')).toBeNull();
+  });
+
   it('shows the voice button while empty and Send once the user types', () => {
     const {getByTestId, queryByTestId, getByPlaceholderText} = renderInput();
     expect(getByTestId('voice-mode-button')).toBeTruthy();

@@ -243,6 +243,7 @@ export const ChatView = observer(
     dateFormat,
     disableImageGallery,
     enableAnimation,
+    enableVoice = true,
     flatListProps,
     inputProps,
     isLastPage,
@@ -926,6 +927,7 @@ export const ChatView = observer(
             <Message
               {...{
                 enableAnimation,
+                enableVoice,
                 isActiveRun,
                 activeRunPendingTalentNames: isActiveRun
                   ? activeRunPendingTalentNames
@@ -956,6 +958,7 @@ export const ChatView = observer(
       },
       [
         enableAnimation,
+        enableVoice,
         handleMessageLongPress,
         handleMessagePress,
         onPreviewDataFetched,
@@ -1218,6 +1221,7 @@ export const ChatView = observer(
                 <ChatInput
                   {...{
                     ...unwrap(inputProps),
+                    enableVoice,
                     isStreaming,
                     onSendPress: wrappedOnSendPress,
                     onStopPress,
