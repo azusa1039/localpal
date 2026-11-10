@@ -1737,4 +1737,12 @@ describe('SettingsScreen', () => {
       expect(searchProviderStore.setActiveProvider).not.toHaveBeenCalled();
     });
   });
+  it('hides voice, cloud search and purchases in the LocalPal flow', () => {
+    const {queryByTestId, queryByText} = render(<SettingsScreen localOnly />, {
+      withNavigation: true,
+    });
+    expect(queryByTestId('internet-search-card')).toBeNull();
+    expect(queryByTestId('voice-mode-availability-switch')).toBeNull();
+    expect(queryByText('PocketPal Plus')).toBeNull();
+  });
 });

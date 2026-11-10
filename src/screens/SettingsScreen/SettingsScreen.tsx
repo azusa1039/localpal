@@ -104,7 +104,10 @@ const languageName = (code: string): string =>
     ? languageDisplayNames[code as AvailableLanguage]
     : code.toUpperCase();
 
-export const SettingsScreen: React.FC = observer(() => {
+type SettingsScreenProps = {localOnly?: boolean};
+
+export const SettingsScreen: React.FC<SettingsScreenProps> = observer(props => {
+  const {localOnly = false} = props;
   const l10n = useContext(L10nContext);
   const theme = useTheme();
   const styles = createStyles(theme);
@@ -1092,247 +1095,276 @@ export const SettingsScreen: React.FC = observer(() => {
                 </View>
                 <Divider />
 
-                {/* Text-to-speech availability toggle */}
-                <View style={styles.switchContainer}>
-                  <View style={styles.textContainer}>
-                    <View style={styles.labelWithIconContainer}>
-                      <VolumeOnIcon
-                        width={20}
-                        height={20}
-                        style={styles.settingIcon}
-                        stroke={theme.colors.onSurface}
-                      />
-                      <Text variant="titleMedium" style={styles.textLabel}>
-                        {l10n.settings.ttsAvailability}
-                      </Text>
-                    </View>
-                    <Text variant="labelSmall" style={styles.textDescription}>
-                      {l10n.settings.ttsAvailabilityDescription}
-                    </Text>
-                    {!ttsStore.deviceMeetsMemory && (
-                      <Text variant="labelSmall" style={styles.textDescription}>
-                        {l10n.settings.ttsAvailabilityLowMemoryWarning}
-                      </Text>
-                    )}
-                  </View>
-                  <Switch
-                    testID="tts-availability-switch"
-                    value={
-                      ttsStore.userTTSOverride ?? ttsStore.deviceMeetsMemory
-                    }
-                    onValueChange={value => ttsStore.setUserTTSOverride(value)}
-                  />
-                </View>
-
-                <Divider />
-
-                {/* Voice input (ASR) availability toggle */}
-                <View style={styles.switchContainer}>
-                  <View style={styles.textContainer}>
-                    <View style={styles.labelWithIconContainer}>
-                      <MicrophoneIcon
-                        width={20}
-                        height={20}
-                        style={styles.settingIcon}
-                        stroke={theme.colors.onSurface}
-                      />
-                      <Text variant="titleMedium" style={styles.textLabel}>
-                        {l10n.voiceInput.settingTitle}
-                      </Text>
-                    </View>
-                    <Text variant="labelSmall" style={styles.textDescription}>
-                      {l10n.voiceInput.settingDescription}
-                    </Text>
-                    {!asrStore.deviceSupported && (
-                      <Text variant="labelSmall" style={styles.textDescription}>
-                        {l10n.voiceInput.unsupportedDeviceHelper}
-                      </Text>
-                    )}
-                  </View>
-                  <Switch
-                    testID="asr-availability-switch"
-                    value={asrStore.userASROverride ?? asrStore.deviceSupported}
-                    onValueChange={value => asrStore.setUserASROverride(value)}
-                  />
-                </View>
-
-                {asrStore.asrAvailable && (
-                  <View style={styles.switchContainer}>
-                    <View style={styles.textContainer}>
-                      <Text variant="bodyMedium" style={styles.textLabel}>
-                        {l10n.voiceInput.spokenLanguageLabel}
-                      </Text>
-                      <Text
-                        variant="labelSmall"
-                        style={styles.textDescription}
-                        testID="asr-spoken-language">
-                        {asrStore.spokenLanguage
-                          ? t(l10n.voiceInput.spokenLanguageDetected, {
-                              language: languageName(asrStore.spokenLanguage),
-                            })
-                          : l10n.voiceInput.spokenLanguageAuto}
-                      </Text>
-                    </View>
-                    {asrStore.spokenLanguage && (
-                      <Button
-                        mode="outlined"
-                        testID="asr-reset-language"
-                        onPress={() => asrStore.setSpokenLanguage(null)}
-                        style={styles.menuButton}>
-                        {l10n.voiceInput.resetLanguageCta}
-                      </Button>
-                    )}
-                  </View>
-                )}
-
-                <Divider />
-
-                <View style={styles.switchContainer}>
-                  <View style={styles.textContainer}>
-                    <View style={styles.labelWithIconContainer}>
-                      <VoiceWaveformIcon
-                        width={20}
-                        height={20}
-                        style={styles.settingIcon}
-                        color={theme.colors.onSurface}
-                      />
-                      <Text variant="titleMedium" style={styles.textLabel}>
-                        {l10n.voiceMode.settingTitle}
-                      </Text>
-                    </View>
-                    <Text variant="labelSmall" style={styles.textDescription}>
-                      {l10n.voiceMode.settingDescription}
-                    </Text>
-                    {!voiceModeStore.deviceSupported && (
-                      <Text variant="labelSmall" style={styles.textDescription}>
-                        {l10n.voiceMode.unsupportedDeviceHelper}
-                      </Text>
-                    )}
-                  </View>
-                  <Switch
-                    testID="voice-mode-availability-switch"
-                    value={voiceModeStore.supported}
-                    onValueChange={value =>
-                      voiceModeStore.setUserVoiceModeOverride(value)
-                    }
-                  />
-                </View>
-
-                {(asrStore.asrAvailable || voiceModeStore.supported) && (
+                {!localOnly && (
                   <>
-                    <Divider />
-                    <View
-                      style={styles.switchContainer}
-                      testID="asr-models-header">
+                    {/* Text-to-speech availability toggle */}
+                    <View style={styles.switchContainer}>
                       <View style={styles.textContainer}>
-                        <Text variant="titleMedium" style={styles.textLabel}>
-                          {l10n.voiceMode.sttRowTitle}
-                        </Text>
+                        <View style={styles.labelWithIconContainer}>
+                          <VolumeOnIcon
+                            width={20}
+                            height={20}
+                            style={styles.settingIcon}
+                            stroke={theme.colors.onSurface}
+                          />
+                          <Text variant="titleMedium" style={styles.textLabel}>
+                            {l10n.settings.ttsAvailability}
+                          </Text>
+                        </View>
                         <Text
                           variant="labelSmall"
                           style={styles.textDescription}>
-                          {l10n.voiceInput.modelSectionHelper}
+                          {l10n.settings.ttsAvailabilityDescription}
                         </Text>
+                        {!ttsStore.deviceMeetsMemory && (
+                          <Text
+                            variant="labelSmall"
+                            style={styles.textDescription}>
+                            {l10n.settings.ttsAvailabilityLowMemoryWarning}
+                          </Text>
+                        )}
                       </View>
+                      <Switch
+                        testID="tts-availability-switch"
+                        value={
+                          ttsStore.userTTSOverride ?? ttsStore.deviceMeetsMemory
+                        }
+                        onValueChange={value =>
+                          ttsStore.setUserTTSOverride(value)
+                        }
+                      />
                     </View>
-                    {ASR_TIER_ORDER.map((tier: AsrTier) => {
-                      const state = asrStore.downloadStates[tier];
-                      const sizeMb = Math.round(
-                        ASR_TIERS[tier].estimatedBytes / (1024 * 1024),
-                      );
-                      // Match the preflight threshold (estimated * headroom) so a
-                      // user who frees exactly this amount clears the disk gate.
-                      const requiredMb = Math.ceil(
-                        (ASR_TIERS[tier].estimatedBytes *
-                          ASR_DISK_HEADROOM_FACTOR) /
-                          (1024 * 1024),
-                      );
-                      const lowDisk =
-                        state === 'error' &&
-                        asrStore.downloadError[tier] ===
-                          ASR_INSUFFICIENT_STORAGE;
-                      const freeMb =
-                        asrStore.freeDiskBytes != null
-                          ? Math.floor(asrStore.freeDiskBytes / (1024 * 1024))
-                          : null;
-                      return (
-                        <View key={tier} style={styles.switchContainer}>
+
+                    <Divider />
+
+                    {/* Voice input (ASR) availability toggle */}
+                    <View style={styles.switchContainer}>
+                      <View style={styles.textContainer}>
+                        <View style={styles.labelWithIconContainer}>
+                          <MicrophoneIcon
+                            width={20}
+                            height={20}
+                            style={styles.settingIcon}
+                            stroke={theme.colors.onSurface}
+                          />
+                          <Text variant="titleMedium" style={styles.textLabel}>
+                            {l10n.voiceInput.settingTitle}
+                          </Text>
+                        </View>
+                        <Text
+                          variant="labelSmall"
+                          style={styles.textDescription}>
+                          {l10n.voiceInput.settingDescription}
+                        </Text>
+                        {!asrStore.deviceSupported && (
+                          <Text
+                            variant="labelSmall"
+                            style={styles.textDescription}>
+                            {l10n.voiceInput.unsupportedDeviceHelper}
+                          </Text>
+                        )}
+                      </View>
+                      <Switch
+                        testID="asr-availability-switch"
+                        value={
+                          asrStore.userASROverride ?? asrStore.deviceSupported
+                        }
+                        onValueChange={value =>
+                          asrStore.setUserASROverride(value)
+                        }
+                      />
+                    </View>
+
+                    {asrStore.asrAvailable && (
+                      <View style={styles.switchContainer}>
+                        <View style={styles.textContainer}>
+                          <Text variant="bodyMedium" style={styles.textLabel}>
+                            {l10n.voiceInput.spokenLanguageLabel}
+                          </Text>
+                          <Text
+                            variant="labelSmall"
+                            style={styles.textDescription}
+                            testID="asr-spoken-language">
+                            {asrStore.spokenLanguage
+                              ? t(l10n.voiceInput.spokenLanguageDetected, {
+                                  language: languageName(
+                                    asrStore.spokenLanguage,
+                                  ),
+                                })
+                              : l10n.voiceInput.spokenLanguageAuto}
+                          </Text>
+                        </View>
+                        {asrStore.spokenLanguage && (
+                          <Button
+                            mode="outlined"
+                            testID="asr-reset-language"
+                            onPress={() => asrStore.setSpokenLanguage(null)}
+                            style={styles.menuButton}>
+                            {l10n.voiceInput.resetLanguageCta}
+                          </Button>
+                        )}
+                      </View>
+                    )}
+
+                    <Divider />
+
+                    <View style={styles.switchContainer}>
+                      <View style={styles.textContainer}>
+                        <View style={styles.labelWithIconContainer}>
+                          <VoiceWaveformIcon
+                            width={20}
+                            height={20}
+                            style={styles.settingIcon}
+                            color={theme.colors.onSurface}
+                          />
+                          <Text variant="titleMedium" style={styles.textLabel}>
+                            {l10n.voiceMode.settingTitle}
+                          </Text>
+                        </View>
+                        <Text
+                          variant="labelSmall"
+                          style={styles.textDescription}>
+                          {l10n.voiceMode.settingDescription}
+                        </Text>
+                        {!voiceModeStore.deviceSupported && (
+                          <Text
+                            variant="labelSmall"
+                            style={styles.textDescription}>
+                            {l10n.voiceMode.unsupportedDeviceHelper}
+                          </Text>
+                        )}
+                      </View>
+                      <Switch
+                        testID="voice-mode-availability-switch"
+                        value={voiceModeStore.supported}
+                        onValueChange={value =>
+                          voiceModeStore.setUserVoiceModeOverride(value)
+                        }
+                      />
+                    </View>
+
+                    {(asrStore.asrAvailable || voiceModeStore.supported) && (
+                      <>
+                        <Divider />
+                        <View
+                          style={styles.switchContainer}
+                          testID="asr-models-header">
                           <View style={styles.textContainer}>
-                            <Text variant="bodyMedium" style={styles.textLabel}>
-                              {asrTierLabel(tier, l10n)}
+                            <Text
+                              variant="titleMedium"
+                              style={styles.textLabel}>
+                              {l10n.voiceMode.sttRowTitle}
                             </Text>
                             <Text
                               variant="labelSmall"
                               style={styles.textDescription}>
-                              {asrTierHint(tier, l10n)}
+                              {l10n.voiceInput.modelSectionHelper}
                             </Text>
-                            <Text
-                              variant="labelSmall"
-                              style={styles.textDescription}>
-                              {t(l10n.voiceInput.tierSizeLabel, {sizeMb})}
-                            </Text>
-                            {lowDisk && freeMb != null ? (
-                              <Text
-                                variant="labelSmall"
-                                style={styles.errorText}
-                                testID={`asr-insufficient-storage-${tier}`}>
-                                {t(l10n.voiceInput.insufficientStorage, {
-                                  requiredMb,
-                                  freeMb,
-                                })}
-                              </Text>
-                            ) : null}
                           </View>
-                          {state === 'ready' ? (
-                            <View style={styles.tierActions}>
-                              {tier === asrStore.selectedTier ? (
+                        </View>
+                        {ASR_TIER_ORDER.map((tier: AsrTier) => {
+                          const state = asrStore.downloadStates[tier];
+                          const sizeMb = Math.round(
+                            ASR_TIERS[tier].estimatedBytes / (1024 * 1024),
+                          );
+                          // Match the preflight threshold (estimated * headroom) so a
+                          // user who frees exactly this amount clears the disk gate.
+                          const requiredMb = Math.ceil(
+                            (ASR_TIERS[tier].estimatedBytes *
+                              ASR_DISK_HEADROOM_FACTOR) /
+                              (1024 * 1024),
+                          );
+                          const lowDisk =
+                            state === 'error' &&
+                            asrStore.downloadError[tier] ===
+                              ASR_INSUFFICIENT_STORAGE;
+                          const freeMb =
+                            asrStore.freeDiskBytes != null
+                              ? Math.floor(
+                                  asrStore.freeDiskBytes / (1024 * 1024),
+                                )
+                              : null;
+                          return (
+                            <View key={tier} style={styles.switchContainer}>
+                              <View style={styles.textContainer}>
                                 <Text
-                                  variant="labelLarge"
-                                  style={styles.inUseLabel}
-                                  testID={`asr-in-use-${tier}`}>
-                                  {l10n.voiceInput.inUseLabel}
+                                  variant="bodyMedium"
+                                  style={styles.textLabel}>
+                                  {asrTierLabel(tier, l10n)}
                                 </Text>
-                              ) : (
+                                <Text
+                                  variant="labelSmall"
+                                  style={styles.textDescription}>
+                                  {asrTierHint(tier, l10n)}
+                                </Text>
+                                <Text
+                                  variant="labelSmall"
+                                  style={styles.textDescription}>
+                                  {t(l10n.voiceInput.tierSizeLabel, {sizeMb})}
+                                </Text>
+                                {lowDisk && freeMb != null ? (
+                                  <Text
+                                    variant="labelSmall"
+                                    style={styles.errorText}
+                                    testID={`asr-insufficient-storage-${tier}`}>
+                                    {t(l10n.voiceInput.insufficientStorage, {
+                                      requiredMb,
+                                      freeMb,
+                                    })}
+                                  </Text>
+                                ) : null}
+                              </View>
+                              {state === 'ready' ? (
+                                <View style={styles.tierActions}>
+                                  {tier === asrStore.selectedTier ? (
+                                    <Text
+                                      variant="labelLarge"
+                                      style={styles.inUseLabel}
+                                      testID={`asr-in-use-${tier}`}>
+                                      {l10n.voiceInput.inUseLabel}
+                                    </Text>
+                                  ) : (
+                                    <Button
+                                      mode="outlined"
+                                      compact
+                                      testID={`asr-use-${tier}`}
+                                      onPress={() => asrStore.selectTier(tier)}>
+                                      {l10n.voiceInput.useCta}
+                                    </Button>
+                                  )}
+                                  <Button
+                                    mode="outlined"
+                                    compact
+                                    testID={`asr-remove-${tier}`}
+                                    onPress={() => asrStore.deleteModel(tier)}>
+                                    {l10n.voiceInput.removeCta}
+                                  </Button>
+                                </View>
+                              ) : state === 'downloading' ? (
                                 <Button
                                   mode="outlined"
-                                  compact
-                                  testID={`asr-use-${tier}`}
-                                  onPress={() => asrStore.selectTier(tier)}>
-                                  {l10n.voiceInput.useCta}
+                                  disabled
+                                  style={styles.menuButton}>
+                                  {l10n.voiceInput.downloadingLabel}
+                                </Button>
+                              ) : (
+                                <Button
+                                  mode="contained"
+                                  testID={`asr-install-${tier}`}
+                                  onPress={() => asrStore.downloadModel(tier)}
+                                  style={styles.menuButton}>
+                                  {state === 'error'
+                                    ? l10n.voiceInput.retryCta
+                                    : l10n.voiceInput.installCta}
                                 </Button>
                               )}
-                              <Button
-                                mode="outlined"
-                                compact
-                                testID={`asr-remove-${tier}`}
-                                onPress={() => asrStore.deleteModel(tier)}>
-                                {l10n.voiceInput.removeCta}
-                              </Button>
                             </View>
-                          ) : state === 'downloading' ? (
-                            <Button
-                              mode="outlined"
-                              disabled
-                              style={styles.menuButton}>
-                              {l10n.voiceInput.downloadingLabel}
-                            </Button>
-                          ) : (
-                            <Button
-                              mode="contained"
-                              testID={`asr-install-${tier}`}
-                              onPress={() => asrStore.downloadModel(tier)}
-                              style={styles.menuButton}>
-                              {state === 'error'
-                                ? l10n.voiceInput.retryCta
-                                : l10n.voiceInput.installCta}
-                            </Button>
-                          )}
-                        </View>
-                      );
-                    })}
+                          );
+                        })}
+                      </>
+                    )}
                   </>
                 )}
-
                 {/* Display Memory Usage (iOS only) */}
                 {Platform.OS === 'ios' && (
                   <>
@@ -1370,177 +1402,196 @@ export const SettingsScreen: React.FC = observer(() => {
             </Card.Content>
           </Card>
 
-          {/* Internet Search */}
-          <Card elevation={0} style={styles.card} testID="internet-search-card">
-            <Card.Title title={l10n.settings.internetSearch.title} />
-            <Card.Content>
-              <View style={styles.settingItemContainer}>
-                <Text variant="labelSmall" style={styles.textDescription}>
-                  {l10n.settings.internetSearch.description}
-                </Text>
-
-                {/* First-enable consent gate / revoke affordance */}
-                {!searchHasConsent ? (
-                  <View
-                    testID="internet-search-consent"
-                    style={styles.consentContainer}>
-                    <Text variant="titleMedium" style={styles.textLabel}>
-                      {l10n.settings.internetSearch.consentTitle}
-                    </Text>
+          {!localOnly && (
+            <>
+              {/* Internet Search */}
+              <Card
+                elevation={0}
+                style={styles.card}
+                testID="internet-search-card">
+                <Card.Title title={l10n.settings.internetSearch.title} />
+                <Card.Content>
+                  <View style={styles.settingItemContainer}>
                     <Text variant="labelSmall" style={styles.textDescription}>
-                      {l10n.settings.internetSearch.consentDescription}
+                      {l10n.settings.internetSearch.description}
                     </Text>
-                    <Button
-                      testID="internet-search-consent-accept"
-                      mode="contained"
-                      onPress={() => searchProviderStore.setConsent(true)}
-                      style={styles.consentButton}>
-                      {l10n.settings.internetSearch.consentAccept}
-                    </Button>
-                  </View>
-                ) : (
-                  <View
-                    testID="internet-search-consent-given"
-                    style={styles.consentContainer}>
-                    <Text variant="titleMedium" style={styles.textLabel}>
-                      {l10n.settings.internetSearch.consentGivenTitle}
-                    </Text>
-                    <Text variant="labelSmall" style={styles.textDescription}>
-                      {l10n.settings.internetSearch.consentGivenDescription}
-                    </Text>
-                    <Button
-                      testID="internet-search-consent-revoke"
-                      mode="outlined"
-                      onPress={() => searchProviderStore.setConsent(false)}
-                      style={styles.consentButton}>
-                      {l10n.settings.internetSearch.consentRevoke}
-                    </Button>
-                  </View>
-                )}
 
-                {/* Provider picker */}
-                <Divider style={styles.divider} />
-                <View style={styles.switchContainer}>
-                  <View style={styles.textContainer}>
-                    <Text variant="titleMedium" style={styles.textLabel}>
-                      {l10n.settings.internetSearch.providerLabel}
-                    </Text>
-                  </View>
-                  <View style={styles.menuContainer}>
-                    <Button
-                      ref={searchProviderMenu.buttonRef}
-                      testID="search-provider-selector-button"
-                      mode="outlined"
-                      onPress={searchProviderMenu.open}
-                      style={styles.menuButton}
-                      contentStyle={styles.buttonContent}
-                      icon={({size, color}) => (
-                        <Icon source="chevron-down" size={size} color={color} />
-                      )}>
-                      {activeSearchProvider?.label ?? activeSearchProviderId}
-                    </Button>
-                    <Menu
-                      visible={searchProviderMenu.visible}
-                      onDismiss={searchProviderMenu.close}
-                      anchor={searchProviderMenu.anchor}
-                      selectable>
-                      {searchProviderStore.providers.map(provider => (
-                        <Menu.Item
-                          key={provider.id}
-                          testID={`search-provider-option-${provider.id}`}
-                          disabled={!provider.selectable}
-                          style={styles.menu}
-                          label={
-                            provider.selectable
-                              ? provider.label
-                              : `${provider.label} (${l10n.settings.internetSearch.providerGated})`
-                          }
-                          selected={provider.id === activeSearchProviderId}
-                          onPress={() => {
-                            searchProviderStore.setActiveProvider(
-                              provider.id as SearchProviderId,
-                            );
-                            searchProviderMenu.close();
-                          }}
-                        />
-                      ))}
-                    </Menu>
-                  </View>
-                </View>
-
-                {/* Per-provider BYOK key entry */}
-                <Divider style={styles.divider} />
-                <View style={styles.switchContainer}>
-                  <View style={styles.textContainer}>
-                    <Text variant="titleMedium" style={styles.textLabel}>
-                      {l10n.settings.internetSearch.keyLabel}
-                    </Text>
-                    <Text variant="labelSmall" style={styles.textDescription}>
-                      {searchProviderStore.hasKey(activeSearchProviderId)
-                        ? t(l10n.settings.internetSearch.keyIsSet, {
-                            provider:
-                              activeSearchProvider?.label ??
-                              activeSearchProviderId,
-                          })
-                        : searchProviderStore.isKeyOptional(
-                              activeSearchProviderId,
-                            )
-                          ? t(l10n.settings.internetSearch.keyOptional, {
-                              provider:
-                                activeSearchProvider?.label ??
-                                activeSearchProviderId,
-                            })
-                          : t(l10n.settings.internetSearch.keyNotSet, {
-                              provider:
-                                activeSearchProvider?.label ??
-                                activeSearchProviderId,
-                            })}
-                    </Text>
-                    {!searchHasConsent && (
-                      <Text variant="labelSmall" style={styles.textDescription}>
-                        {l10n.settings.internetSearch.consentRequired}
-                      </Text>
+                    {/* First-enable consent gate / revoke affordance */}
+                    {!searchHasConsent ? (
+                      <View
+                        testID="internet-search-consent"
+                        style={styles.consentContainer}>
+                        <Text variant="titleMedium" style={styles.textLabel}>
+                          {l10n.settings.internetSearch.consentTitle}
+                        </Text>
+                        <Text
+                          variant="labelSmall"
+                          style={styles.textDescription}>
+                          {l10n.settings.internetSearch.consentDescription}
+                        </Text>
+                        <Button
+                          testID="internet-search-consent-accept"
+                          mode="contained"
+                          onPress={() => searchProviderStore.setConsent(true)}
+                          style={styles.consentButton}>
+                          {l10n.settings.internetSearch.consentAccept}
+                        </Button>
+                      </View>
+                    ) : (
+                      <View
+                        testID="internet-search-consent-given"
+                        style={styles.consentContainer}>
+                        <Text variant="titleMedium" style={styles.textLabel}>
+                          {l10n.settings.internetSearch.consentGivenTitle}
+                        </Text>
+                        <Text
+                          variant="labelSmall"
+                          style={styles.textDescription}>
+                          {l10n.settings.internetSearch.consentGivenDescription}
+                        </Text>
+                        <Button
+                          testID="internet-search-consent-revoke"
+                          mode="outlined"
+                          onPress={() => searchProviderStore.setConsent(false)}
+                          style={styles.consentButton}>
+                          {l10n.settings.internetSearch.consentRevoke}
+                        </Button>
+                      </View>
                     )}
+
+                    {/* Provider picker */}
+                    <Divider style={styles.divider} />
+                    <View style={styles.switchContainer}>
+                      <View style={styles.textContainer}>
+                        <Text variant="titleMedium" style={styles.textLabel}>
+                          {l10n.settings.internetSearch.providerLabel}
+                        </Text>
+                      </View>
+                      <View style={styles.menuContainer}>
+                        <Button
+                          ref={searchProviderMenu.buttonRef}
+                          testID="search-provider-selector-button"
+                          mode="outlined"
+                          onPress={searchProviderMenu.open}
+                          style={styles.menuButton}
+                          contentStyle={styles.buttonContent}
+                          icon={({size, color}) => (
+                            <Icon
+                              source="chevron-down"
+                              size={size}
+                              color={color}
+                            />
+                          )}>
+                          {activeSearchProvider?.label ??
+                            activeSearchProviderId}
+                        </Button>
+                        <Menu
+                          visible={searchProviderMenu.visible}
+                          onDismiss={searchProviderMenu.close}
+                          anchor={searchProviderMenu.anchor}
+                          selectable>
+                          {searchProviderStore.providers.map(provider => (
+                            <Menu.Item
+                              key={provider.id}
+                              testID={`search-provider-option-${provider.id}`}
+                              disabled={!provider.selectable}
+                              style={styles.menu}
+                              label={
+                                provider.selectable
+                                  ? provider.label
+                                  : `${provider.label} (${l10n.settings.internetSearch.providerGated})`
+                              }
+                              selected={provider.id === activeSearchProviderId}
+                              onPress={() => {
+                                searchProviderStore.setActiveProvider(
+                                  provider.id as SearchProviderId,
+                                );
+                                searchProviderMenu.close();
+                              }}
+                            />
+                          ))}
+                        </Menu>
+                      </View>
+                    </View>
+
+                    {/* Per-provider BYOK key entry */}
+                    <Divider style={styles.divider} />
+                    <View style={styles.switchContainer}>
+                      <View style={styles.textContainer}>
+                        <Text variant="titleMedium" style={styles.textLabel}>
+                          {l10n.settings.internetSearch.keyLabel}
+                        </Text>
+                        <Text
+                          variant="labelSmall"
+                          style={styles.textDescription}>
+                          {searchProviderStore.hasKey(activeSearchProviderId)
+                            ? t(l10n.settings.internetSearch.keyIsSet, {
+                                provider:
+                                  activeSearchProvider?.label ??
+                                  activeSearchProviderId,
+                              })
+                            : searchProviderStore.isKeyOptional(
+                                  activeSearchProviderId,
+                                )
+                              ? t(l10n.settings.internetSearch.keyOptional, {
+                                  provider:
+                                    activeSearchProvider?.label ??
+                                    activeSearchProviderId,
+                                })
+                              : t(l10n.settings.internetSearch.keyNotSet, {
+                                  provider:
+                                    activeSearchProvider?.label ??
+                                    activeSearchProviderId,
+                                })}
+                        </Text>
+                        {!searchHasConsent && (
+                          <Text
+                            variant="labelSmall"
+                            style={styles.textDescription}>
+                            {l10n.settings.internetSearch.consentRequired}
+                          </Text>
+                        )}
+                      </View>
+                      <Button
+                        testID="search-provider-key-button"
+                        mode="outlined"
+                        disabled={!searchHasConsent}
+                        onPress={() => setShowSearchKeySheet(true)}
+                        style={styles.menuButton}>
+                        {searchProviderStore.hasKey(activeSearchProviderId)
+                          ? l10n.settings.internetSearch.updateKeyButton
+                          : l10n.settings.internetSearch.setKeyButton}
+                      </Button>
+                    </View>
+
+                    {/* Result-count control */}
+                    <Divider style={styles.divider} />
+                    <View style={styles.textContainer}>
+                      <Text variant="titleMedium" style={styles.textLabel}>
+                        {l10n.settings.internetSearch.resultCountLabel}
+                      </Text>
+                      <InputSlider
+                        testID="search-result-count-slider"
+                        accessibilityLabel={
+                          l10n.settings.internetSearch.resultCountLabel
+                        }
+                        value={searchProviderStore.resultCount}
+                        onValueChange={value =>
+                          searchProviderStore.setResultCount(Math.round(value))
+                        }
+                        min={1}
+                        max={8}
+                        step={1}
+                      />
+                      <Text variant="labelSmall" style={styles.textDescription}>
+                        {l10n.settings.internetSearch.resultCountDescription}
+                      </Text>
+                    </View>
                   </View>
-                  <Button
-                    testID="search-provider-key-button"
-                    mode="outlined"
-                    disabled={!searchHasConsent}
-                    onPress={() => setShowSearchKeySheet(true)}
-                    style={styles.menuButton}>
-                    {searchProviderStore.hasKey(activeSearchProviderId)
-                      ? l10n.settings.internetSearch.updateKeyButton
-                      : l10n.settings.internetSearch.setKeyButton}
-                  </Button>
-                </View>
-
-                {/* Result-count control */}
-                <Divider style={styles.divider} />
-                <View style={styles.textContainer}>
-                  <Text variant="titleMedium" style={styles.textLabel}>
-                    {l10n.settings.internetSearch.resultCountLabel}
-                  </Text>
-                  <InputSlider
-                    testID="search-result-count-slider"
-                    accessibilityLabel={
-                      l10n.settings.internetSearch.resultCountLabel
-                    }
-                    value={searchProviderStore.resultCount}
-                    onValueChange={value =>
-                      searchProviderStore.setResultCount(Math.round(value))
-                    }
-                    min={1}
-                    max={8}
-                    step={1}
-                  />
-                  <Text variant="labelSmall" style={styles.textDescription}>
-                    {l10n.settings.internetSearch.resultCountDescription}
-                  </Text>
-                </View>
-              </View>
-            </Card.Content>
-          </Card>
-
+                </Card.Content>
+              </Card>
+            </>
+          )}
           {/* API Settings */}
           <Card elevation={0} style={styles.card}>
             <Card.Title title={l10n.settings.apiSettingsTitle} />
@@ -1685,12 +1736,15 @@ export const SettingsScreen: React.FC = observer(() => {
             </Card>
           )}
 
-          <PurchasesCard onSignInPress={() => setShowAuthSheet(true)} />
+          {!localOnly && (
+            <>
+              <PurchasesCard onSignInPress={() => setShowAuthSheet(true)} />
 
-          <AccountCard />
+              <AccountCard />
 
-          <LocalApiServerCard />
-
+              <LocalApiServerCard />
+            </>
+          )}
           {/* Export Options */}
           <Card elevation={0} style={styles.card}>
             <Card.Title title={l10n.settings.exportOptions} />

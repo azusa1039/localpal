@@ -9,6 +9,7 @@ import {CloudPlusIcon} from '../../../assets/icons';
 import {createStyles} from './styles';
 
 interface FABGroupProps {
+  localOnly?: boolean;
   onAddHFModel: () => void;
   onAddLocalModel: () => void;
   onAddRemoteModel: () => void;
@@ -34,6 +35,7 @@ const RemoteIcon = (props: IconComponentProps): React.ReactNode => (
 );
 
 export const FABGroup: React.FC<FABGroupProps> = ({
+  localOnly = false,
   onAddHFModel,
   onAddLocalModel,
   onAddRemoteModel,
@@ -92,8 +94,13 @@ export const FABGroup: React.FC<FABGroupProps> = ({
         },
       });
     }
-    return items;
+    return localOnly
+      ? items.filter(
+          item => item.testID === 'hf-fab' || item.testID === 'local-fab',
+        )
+      : items;
   }, [
+    localOnly,
     l10n,
     onAddHFModel,
     onAddLocalModel,

@@ -5,12 +5,13 @@ import {Theme} from '../../../utils/types';
 export const createStyles = (theme: Theme) =>
   StyleSheet.create({
     card: {
-      borderRadius: 24, // Updated to match rounded-3xl (24px)
-      margin: 6,
+      borderRadius: 20,
+      marginHorizontal: 12,
+      marginVertical: 6,
       //overflow: 'hidden',
       backgroundColor: theme.colors.background,
-      borderColor: theme.colors.outline,
-      borderWidth: 1,
+      borderColor: theme.colors.outlineVariant,
+      borderWidth: StyleSheet.hairlineWidth,
     },
     cardContent: {
       paddingBottom: 6,

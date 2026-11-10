@@ -54,6 +54,7 @@ import {
   ChatScreen,
   ModelsScreen,
   SettingsScreen,
+  SettingsHomeScreen,
   BenchmarkScreen,
   AboutScreen,
 
@@ -61,7 +62,6 @@ import {
   DevToolsScreen,
 } from './src/screens';
 import PalsScreen from './src/screens/PalsScreen';
-import {OnboardingStack} from './src/screens/OnboardingScreens';
 
 // Check if app is in debug mode
 const isDebugMode = __DEV__;
@@ -71,6 +71,8 @@ if (__E2E__) {
   plusShipOverride.restore();
 }
 
+const LocalSettingsScreen = () => <SettingsScreen localOnly />;
+const LocalModelsScreen = () => <ModelsScreen localOnly />;
 const Drawer = createDrawerNavigator();
 
 const screenWidth = Dimensions.get('window').width;
@@ -81,21 +83,12 @@ const DeepLinkHandler = () => {
   return null;
 };
 
-// Branches between the OnboardingStack (first-launch flow) and the main
-// Drawer.Navigator. Both children mount under the same provider tree —
-// switching does NOT remount providers above this point.
-//
-// The hydration check is belt-and-suspenders. AppWithMigrationWrapper
-// already gates render on `isHydrated(uiStore)`, but reading the same
-// observable here keeps the contract local and survives refactors of the
-// outer gate.
+// LocalPal opens directly into local chat. Keep hydration gating, while the
+// upstream account/voice/PalsHub onboarding stays outside the Phase 1 flow.
 type SwitchPointProps = {drawer: React.ReactNode};
 const SwitchPoint: React.FC<SwitchPointProps> = observer(({drawer}) => {
   if (!isHydrated(uiStore)) {
     return null;
-  }
-  if (!uiStore.hasCompletedOnboarding) {
-    return <OnboardingStack />;
   }
   return <>{drawer}</>;
 });
@@ -177,8 +170,13 @@ const App = observer(() => {
                             />
                             <Drawer.Screen
                               name={ROUTES.MODELS}
-                              component={gestureHandlerRootHOC(ModelsScreen)}
+                              component={gestureHandlerRootHOC(
+                                LocalModelsScreen,
+                              )}
                               options={{
+                                headerLeft: () => (
+                                  <HeaderLeft backTo={ROUTES.SETTINGS} />
+                                ),
                                 headerRight: () => <ModelsHeaderRight />,
                                 headerStyle: styles.headerWithoutDivider,
                                 title: currentL10n.screenTitles.models,
@@ -194,8 +192,23 @@ const App = observer(() => {
                             />
                             <Drawer.Screen
                               name={ROUTES.SETTINGS}
-                              component={gestureHandlerRootHOC(SettingsScreen)}
+                              component={gestureHandlerRootHOC(
+                                SettingsHomeScreen,
+                              )}
                               options={{
+                                headerStyle: styles.headerWithoutDivider,
+                                title: currentL10n.screenTitles.settings,
+                              }}
+                            />
+                            <Drawer.Screen
+                              name={ROUTES.SETTINGS_ADVANCED}
+                              component={gestureHandlerRootHOC(
+                                LocalSettingsScreen,
+                              )}
+                              options={{
+                                headerLeft: () => (
+                                  <HeaderLeft backTo={ROUTES.SETTINGS} />
+                                ),
                                 headerStyle: styles.headerWithoutDivider,
                                 title: currentL10n.screenTitles.settings,
                               }}

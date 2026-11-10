@@ -5,10 +5,10 @@ import {useFocusEffect, useNavigation} from '@react-navigation/native';
 
 import {styles} from './styles';
 import {claimPlusReturnFocus, releasePlusReturnFocus} from './plusReturnFocus';
-import {MenuIcon} from '../../assets/icons';
+import {ArrowLeftMdIcon, MenuIcon} from '../../assets/icons';
 import {useTheme} from '../../hooks';
 
-export const HeaderLeft: React.FC = () => {
+export const HeaderLeft: React.FC<{backTo?: string}> = ({backTo}) => {
   const theme = useTheme();
   const navigation = useNavigation<DrawerNavigationProp<any>>();
   const buttonRef = useRef<HostInstance>(null);
@@ -26,9 +26,16 @@ export const HeaderLeft: React.FC = () => {
       ref={buttonRef}
       style={[styles.menuIcon]}
       testID="menu-button"
-      accessibilityLabel="Open drawer"
-      onPress={() => navigation.openDrawer()}>
-      <MenuIcon stroke={theme.colors.primary} />
+      accessibilityLabel={backTo ? 'Back' : 'Open drawer'}
+      accessibilityRole="button"
+      onPress={() =>
+        backTo ? navigation.navigate(backTo) : navigation.openDrawer()
+      }>
+      {backTo ? (
+        <ArrowLeftMdIcon stroke={theme.colors.primary} />
+      ) : (
+        <MenuIcon stroke={theme.colors.primary} />
+      )}
     </TouchableOpacity>
   );
 };

@@ -30,6 +30,29 @@ describe('FABGroup', () => {
     expect(getByTestId('fab-group')).toBeTruthy();
   });
 
+  it('offers downloads and GGUF import without cloud actions in LocalPal', () => {
+    const {getByTestId, queryByTestId} = render(
+      <FABGroup
+        localOnly
+        hasServers
+        onManageServers={jest.fn()}
+        onAddHFModel={mockOnAddHFModel}
+        onAddLocalModel={mockOnAddLocalModel}
+        onAddRemoteModel={mockOnAddRemoteModel}
+      />,
+    );
+    expect(getByTestId('hf-fab', {includeHiddenElements: true})).toBeTruthy();
+    expect(
+      getByTestId('local-fab', {includeHiddenElements: true}),
+    ).toBeTruthy();
+    expect(
+      queryByTestId('remote-fab', {includeHiddenElements: true}),
+    ).toBeNull();
+    expect(
+      queryByTestId('manage-servers-fab', {includeHiddenElements: true}),
+    ).toBeNull();
+  });
+
   it('renders all three action buttons (HF, local, remote)', () => {
     const {getByTestId} = render(
       <FABGroup

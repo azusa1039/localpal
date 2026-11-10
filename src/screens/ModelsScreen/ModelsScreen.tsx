@@ -32,7 +32,10 @@ import {Model, ModelOrigin} from '../../utils/types';
 import {isSafePathSegment} from '../../utils/pathGuard';
 import {ErrorState} from '../../utils/errors';
 
-export const ModelsScreen: React.FC = observer(() => {
+type ModelsScreenProps = {localOnly?: boolean};
+
+export const ModelsScreen: React.FC<ModelsScreenProps> = observer(props => {
+  const {localOnly = false} = props;
   const l10n = useContext(L10nContext);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [hfSearchVisible, setHFSearchVisible] = useState(false);
@@ -268,7 +271,11 @@ export const ModelsScreen: React.FC = observer(() => {
   };
 
   const activeModelId = modelStore.activeModel?.id;
-  const models = modelStore.displayModels;
+  const models = localOnly
+    ? modelStore.displayModels.filter(
+        model => model.origin !== ModelOrigin.REMOTE,
+      )
+    : modelStore.displayModels;
 
   // useMemo uses shallow comaprison for dependencies,
   // so we use computed instead for deep comparison
@@ -444,6 +451,7 @@ export const ModelsScreen: React.FC = observer(() => {
         {l10n.models.fileManagement.copyingModel}
       </Snackbar>
       <FABGroup
+        localOnly={localOnly}
         onAddHFModel={() => setHFSearchVisible(true)}
         onAddLocalModel={handleAddLocalModel}
         onAddRemoteModel={handleAddRemoteModel}
