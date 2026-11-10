@@ -256,3 +256,13 @@ playback in the LocalPal flow. It preserves the saved preference, and defaults
 to the original behavior for other callers. Two hook suites / 70 tests passed,
 including normal text completion with saved auto-speak enabled and no speech
 callbacks. TypeScript passed (18.95 seconds).
+
+### Exact-source regression follow-up
+
+The final full run passed 444 suites / 9,378 tests and all 310 snapshots, but
+failed one theme-token adoption invariant. The failing consumer was the model
+card's intentional `theme.radius.l` restyle, not the composer. The invariant
+explicitly permits follow-up restyles with an exact allow-list entry and an
+architecture note. Added only that file and documented the design boundary in
+`LOCALPAL_UI_ARCHITECTURE.md`; the invariant is retained for all other files.
+A new complete run is required before declaring final automated checks passed.

@@ -128,6 +128,9 @@ describe('design-token grep invariants', () => {
       'components/VoiceTeaser',
       'screens/PlusScreen',
       'components/SidebarContent/PlusDrawerItem',
+      // LocalPal Phase 1 intentionally restyles model cards with Radius/L.
+      // Architecture: docs/LOCALPAL_UI_ARCHITECTURE.md.
+      'screens/ModelsScreen/ModelCard/styles.ts',
     ];
     const files = listFiles(SRC).filter(f => {
       const rel = path.relative(SRC, f).replace(/\\/g, '/');
