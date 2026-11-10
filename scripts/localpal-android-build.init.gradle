@@ -1,0 +1,21 @@
+// Optional resource limits for Android builds on hosts with limited RAM.
+// Use Node 22.21.0 from .nvmrc, Java 17 and the project's Android SDK versions.
+// From android/: ./gradlew assembleProdRelease --max-workers=1 \
+//   --init-script ../scripts/localpal-android-build.init.gradle
+gradle.beforeProject { project ->
+    project.pluginManager.withPlugin('com.facebook.react') {
+        def react = project.extensions.findByName('react')
+        react.nodeExecutableAndArgs.set(['node', '--max-old-space-size=5120'])
+        react.extraPackagerArgs.addAll(['--max-workers', '1'])
+    }
+    ['com.android.application', 'com.android.library'].each { pluginId ->
+        project.pluginManager.withPlugin(pluginId) {
+            def android = project.extensions.findByName('android')
+            android.defaultConfig.externalNativeBuild.cmake.arguments.addAll([
+                '-DCMAKE_JOB_POOLS=localpal_compile=1;localpal_link=1',
+                '-DCMAKE_JOB_POOL_COMPILE=localpal_compile',
+                '-DCMAKE_JOB_POOL_LINK=localpal_link'
+            ])
+        }
+    }
+}

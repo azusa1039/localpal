@@ -166,3 +166,33 @@ Android runtime; these will only be marked verified when executed.
 - The production-mode JS bundle was regenerated successfully after this polish.
 - Android runtime acceptance steps: `LOCALPAL_ANDROID_ACCEPTANCE.md`.
   Original user plan: `LOCALPAL_PHASE1_REQUEST.md`.
+
+### Android navigation follow-up
+
+- Drawer navigation now uses history for Android back behavior, so returning
+  from model management/advanced settings follows the visited settings route.
+- App/sidebar checks: 2 suites / 24 tests passed; changed-file ESLint passed.
+- Android native compilation has started for arm64-v8a and x86_64. APK installation,
+  screenshots and local model inference are still pending.
+
+### Final source checks after navigation changes
+
+- Node 22 `yarn typecheck`: passed (16.61 seconds).
+- Node 22 `yarn lint`: passed, 0 errors / 46 existing warnings (43.23 seconds).
+- Added a long Markdown reply regression with 500 ordinary/italic paragraph pairs
+  and a fenced code block; the final Markdown suites passed: 2 suites / 38 tests.
+
+### Reproducing the constrained Android build
+
+An optional portable init script records the resource controls proven during
+this build: `scripts/localpal-android-build.init.gradle`. With Node 22.21.0
+on PATH, Java 17 and Android SDK installed, run from `android/`:
+
+```sh
+./gradlew assembleProdRelease --no-daemon --max-workers=1 \
+  --init-script ../scripts/localpal-android-build.init.gradle
+```
+
+This changes build-time worker/heap limits only, and retains existing runtime
+model/inference settings. Release builds without a private signing key keep the
+upstream debug-signing fallback and should be treated as test APKs.

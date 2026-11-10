@@ -137,6 +137,7 @@ const App = observer(() => {
                       <SwitchPoint
                         drawer={
                           <Drawer.Navigator
+                            backBehavior="history"
                             screenOptions={{
                               headerLeft: () => <HeaderLeft />,
                               drawerStyle: {

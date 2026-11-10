@@ -35,7 +35,23 @@ describe('standalone italic Markdown paragraphs', () => {
       '<p class="standalone-italic"><em>Quiet <strong>bold</strong> <a href="https://example.com">link</a>.</em></p>',
     );
     expect(result).toContain('<table>');
-    expect(source).toContain('[ref]: https://example.com');
+  });
+
+  it('preserves paragraph boundaries and code in a long reply', () => {
+    const source = Array.from(
+      {length: 500},
+      (_, index) =>
+        `Paragraph ${index} with *inline* emphasis.\n\n*Aside ${index}.*`,
+    ).join('\n\n');
+    const result = renderMarkdown(
+      `${source}\n\n\`\`\`text\n*literal code*\n\`\`\``,
+    );
+    expect(result.match(/class="standalone-italic"/g)).toHaveLength(500);
+    expect(result).toContain(
+      '<p>Paragraph 499 with <em>inline</em> emphasis.</p>',
+    );
+    expect(result).toContain('<em>Aside 499.</em>');
+    expect(result).toContain('<code class="language-text">*literal code*');
   });
 
   it('re-evaluates the current stream without retaining earlier paragraph styles', () => {

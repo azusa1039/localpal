@@ -1,3 +1,18 @@
+# LocalPal
+
+LocalPal 是基于 [PocketPal AI](https://github.com/a-ghorbani/pocketpal-ai) 的 Android 本地 AI 聊天应用。本阶段整理聊天、侧栏、模型管理、角色设定和 Markdown，继续复用 PocketPal 的 GGUF 推理与本地数据架构。
+
+- [第一阶段开发与测试记录](docs/LOCALPAL_PHASE1_REBUILD.md)
+- [修改文件与 GitHub 备份记录](docs/LOCALPAL_PHASE1_FILES.md)
+- [Android 运行验收步骤](docs/LOCALPAL_ANDROID_ACCEPTANCE.md)
+- [用户提供的第一阶段需求](docs/LOCALPAL_PHASE1_REQUEST.md)
+
+开发分支：`feat/localpal-phase1-rebuild`。APK 与运行验收状态以开发记录为准。
+
+## 上游 PocketPal 项目说明
+
+以下保留原项目说明与出处。
+
 <div align="center">
 
 <img src="src/assets/pocketpal-dark-v2.png" alt="PocketPal AI logo" width="120" />
