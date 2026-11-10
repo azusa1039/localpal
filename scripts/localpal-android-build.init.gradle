@@ -11,8 +11,9 @@ gradle.beforeProject { project ->
     ['com.android.application', 'com.android.library'].each { pluginId ->
         project.pluginManager.withPlugin(pluginId) {
             def android = project.extensions.findByName('android')
+            def compileJobs = project.name == 'llama.rn' ? 2 : 1
             android.defaultConfig.externalNativeBuild.cmake.arguments.addAll([
-                '-DCMAKE_JOB_POOLS=localpal_compile=1;localpal_link=1',
+                "-DCMAKE_JOB_POOLS=localpal_compile=${compileJobs};localpal_link=1".toString(),
                 '-DCMAKE_JOB_POOL_COMPILE=localpal_compile',
                 '-DCMAKE_JOB_POOL_LINK=localpal_link'
             ])

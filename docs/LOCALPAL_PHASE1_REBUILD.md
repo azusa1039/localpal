@@ -196,3 +196,31 @@ on PATH, Java 17 and Android SDK installed, run from `android/`:
 This changes build-time worker/heap limits only, and retains existing runtime
 model/inference settings. Release builds without a private signing key keep the
 upstream debug-signing fallback and should be treated as test APKs.
+
+### Full native payload requirements
+
+- The upstream CI requires a source-built patched llama.rn and the Hexagon/OpenCL
+  backend. A CPU-only candidate is not accepted as the final native package.
+- Installed the exact CI Hexagon SDK 6.4.0.2 / tools 19.0.04 outside the repository.
+  The tarball SHA256 matched `b4a57a774795cf12da19a777a5d306e970905bf9758a4c4765e5e4593428ae0b`.
+  The consumed-file SHA256 matched `f56685ec2513933ab6465c44e40e8ce0263bc40751961aa2468da9cbcdfe7409`.
+- The full build sets `HEXAGON_SDK_ROOT`, `HEXAGON_TOOLS_ROOT`,
+  `ORG_GRADLE_PROJECT_rnllamaBuildFromSource=true` and the exact variant list from
+  `node scripts/verify-android-payload.js --print-variants`, matching upstream CI.
+- The earlier build without the SDK was stopped. App C++ objects for both ABIs
+  are cached; the full inference build is now running with the portable init script.
+- Final APK acceptance also requires `scripts/verify-android-payload.js` to pass.
+
+### Model download environment blocker
+
+- A public GGUF smoke-model download from `huggingface.co` was attempted and
+  rejected by the environment proxy (`CONNECT tunnel failed, response 403`).
+  No model was substituted with a mock or reported as running.
+- User was asked to enable the Hugging Face download domains in environment
+  settings or defer model acceptance to the physical device. APK and UI work
+  continue independently while this is pending.
+- The optional build init script uses two compile jobs for llama.rn and one for
+  other native components, with one Gradle worker and one Metro worker.
+- Fixed a Groovy GString-to-String issue in that optional resource-control
+  script; the full configuration now recognizes the pinned Hexagon SDK and
+  the exact upstream native variant list.
